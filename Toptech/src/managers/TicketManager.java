@@ -4,63 +4,91 @@ import dao.TicketDAO;
 import models.Ticket;
 import utils.EmailSender;
 import utils.WhatsAppSender;
+import notifications.NotificationService;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.ArrayList;
 
 public class TicketManager {
     private TicketDAO dao;
     private static int nextId = 1;
+    private final List<NotificationService> notifiers = new ArrayList<>(); // ✅ NUEVO
 
-    // ✅ CONSTRUCTOR ORIGINAL (para tu app desktop)
     public TicketManager() {
         this.dao = new TicketDAO();
     }
 
-    // ✅ CONSTRUCTOR para la app web
     public TicketManager(Connection connection) {
         this.dao = new TicketDAO(connection);
     }
 
-    // ✅ MÉTODO CORREGIDO - Usa el método que SÍ existe en TicketDAO
+    // ✅ NUEVO: Método para agregar notificadores
+    public void addNotifier(NotificationService notifier) {
+        if (notifier != null) {
+            notifiers.add(notifier);
+        }
+    }
+
+    // ✅ NUEVO: Método para notificar creación
+    private void notificarCreacion(Ticket ticket) {
+        for (NotificationService notifier : notifiers) {
+            notifier.onTicketCreated(ticket);
+        }
+    }
+
+    // ✅ NUEVO: Método para notificar actualización
+    private void notificarActualizacion(Ticket ticket, String estadoAnterior) {
+        for (NotificationService notifier : notifiers) {
+            notifier.onTicketUpdated(ticket, estadoAnterior);
+        }
+    }
+
+    // ✅ MODIFICADO: addTicket con notificaciones
+    public void addTicket(Ticket ticket) {
+        try { 
+            dao.addTicket(ticket); 
+            notificarCreacion(ticket); // ✅ NUEVA NOTIFICACIÓN
+        } catch (SQLException e) { 
+            e.printStackTrace(); 
+        }
+    }
+
+    // ✅ MODIFICADO: updateTicket con notificaciones mejoradas
+    public void updateTicket(Ticket ticket) {
+        try {
+            // Obtener estado anterior antes de actualizar
+            Ticket ticketAnterior = dao.findById(ticket.getId());
+            String estadoAnterior = (ticketAnterior != null) ? ticketAnterior.getEstado() : "DESCONOCIDO";
+            
+            dao.updateTicket(ticket);
+            
+            // ✅ NUEVO: Sistema de notificaciones mejorado
+            notificarActualizacion(ticket, estadoAnterior);
+            
+            // ✅ MANTENER: Notificaciones existentes (opcional - puedes eliminarlas)
+            EmailSender.send(ticket.getCorreo(), "Estado de su ticket", 
+                "Su ticket " + ticket.getId() + " está en estado: " + ticket.getEstado());
+            WhatsAppSender.send(ticket.getCelular(), 
+                "Su ticket " + ticket.getId() + " está en estado: " + ticket.getEstado());
+                
+        } catch (SQLException e) { 
+            e.printStackTrace(); 
+        }
+    }
+
+    // Los demás métodos se mantienen igual...
     public List<Ticket> getTicketsByUserDni(String dni) {
         try {
-            // ✅ CORREGIDO: Usar getTicketsByDNI() que SÍ existe en TicketDAO
             return dao.getTicketsByDNI(dni);
         } catch (SQLException e) { 
             System.err.println("❌ Error en getTicketsByUserDni: " + e.getMessage());
-            e.printStackTrace();
             return null; 
         }
     }
 
-    // ✅ MÉTODO ELIMINADO - No existe en TicketDAO
-    // public List<Ticket> getTicketsByUser(int userId) {
-    //     // ❌ ELIMINADO: Este método no existe en TicketDAO
-    // }
-
-    // ✅ TODOS TUS MÉTODOS ORIGINALES - MANTENIDOS 100%
     public String generarNuevoIdTicket() { 
         return String.format("TK%03d", nextId++); 
-    }
-
-    public void addTicket(Ticket ticket) {
-        try { 
-            dao.addTicket(ticket); 
-        } catch (SQLException e) { 
-            e.printStackTrace(); 
-        }
-    }
-
-    public void updateTicket(Ticket ticket) {
-        try {
-            dao.updateTicket(ticket);
-            // Notifica cambios de estado - FUNCIONALIDAD ORIGINAL MANTENIDA
-            EmailSender.send(ticket.getCorreo(), "Estado de su ticket", "Su ticket " + ticket.getId() + " está en estado: " + ticket.getEstado());
-            WhatsAppSender.send(ticket.getCelular(), "Su ticket " + ticket.getId() + " está en estado: " + ticket.getEstado());
-        } catch (SQLException e) { 
-            e.printStackTrace(); 
-        }
     }
 
     public Ticket findTicketById(String id) {
