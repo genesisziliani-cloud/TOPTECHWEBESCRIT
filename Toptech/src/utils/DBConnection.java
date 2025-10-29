@@ -7,12 +7,12 @@ import java.sql.SQLException;
 public class DBConnection {
     private static final String URL = "jdbc:mysql://localhost:3306/toptechbd";
     private static final String USER = "root";  
-    private static final String PASS = "002513";
+    private static final String PASS = "yomar123";
 
     static {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
-            System.out.println("✅ Driver MySQL cargado correctamente");
+            System.out.println("Driver MySQL cargado correctamente");
         } catch (ClassNotFoundException e) {
             throw new RuntimeException("Error cargando driver MySQL", e);
         }
@@ -22,10 +22,10 @@ public class DBConnection {
     public static Connection getConnection() throws SQLException {
         try {
             Connection conn = DriverManager.getConnection(URL, USER, PASS);
-            System.out.println("✅ Conexión MySQL establecida");
+            System.out.println("Conexión MySQL establecida");
             return conn;
         } catch (SQLException e) {
-            System.err.println("❌ Error conectando a la BD: " + e.getMessage());
+            System.err.println("Error conectando a la BD: " + e.getMessage());
             throw e;
         }
     }
