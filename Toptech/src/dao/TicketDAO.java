@@ -69,7 +69,7 @@ public class TicketDAO {
                 }
             }
 
-            System.out.println("✅ Tickets encontrados para DNI " + dni + ": " + lista.size());
+            System.out.println("Tickets encontrados para DNI " + dni + ": " + lista.size());
             return lista;
 
         } finally {
