@@ -2,147 +2,213 @@ package toptech;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import java.awt.*;
 import java.awt.event.*;
-import java.io.FileWriter;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import managers.TicketManager;
 import models.Ticket;
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+/**
+ * Versión corregida de ListTicketsWindow:
+ * - Búsqueda/filtrado por ID, DNI, ESTADO y DESCRIPCION.
+ * - Compatibilidad con el modelo anterior (si el combo trae nombres de estado directamente).
+ * - Exportación a CSV (evita dependencias externas a POI/commons-io).
+ * - Protecciones contra NPE (ticketManager null).
+ *
+ * Reemplaza tu archivo actual por este. Haz backup antes.
+ */
 public class ListTicketsWindow extends javax.swing.JFrame {
 
     private TicketManager ticketManager;
     private JFrame parentWindow;
 
-    // Componentes agregados para búsqueda y exportación
-
     public ListTicketsWindow(TicketManager ticketManager, JFrame parentWindow) {
         this.ticketManager = ticketManager;
         this.parentWindow = parentWindow;
         initComponents();
+        configureBehavior();
         setTitle("Lista de Tickets");
         setLocationRelativeTo(null);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-
-        btnBuscar.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                buscarYFiltrarTickets();
-            }
-        });
-
-        txtBuscar.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                buscarYFiltrarTickets();
-            }
-        });
-
-        btnExportarExcel.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                exportarTablaAExcel();
-            }
-        });
-
         cargarTickets();
     }
 
+    // Constructor vacío usado por el diseñador (evita NPE)
     public ListTicketsWindow() {
         initComponents();
-btnBuscar.addActionListener(new java.awt.event.ActionListener() {
-public void actionPerformed(java.awt.event.ActionEvent evt) {
-buscarYFiltrarTickets();
-    }
-});
-txtBuscar.addActionListener(new java.awt.event.ActionListener() {
-    public void actionPerformed(java.awt.event.ActionEvent evt) {
-        buscarYFiltrarTickets();
-    }
-});
-btnExportarExcel.addActionListener(new java.awt.event.ActionListener() {
-    public void actionPerformed(java.awt.event.ActionEvent evt) {
-        exportarTablaAExcel();
-    }
-});
+        configureBehavior();
     }
 
+    // Centraliza listeners y comportamientos
+    private void configureBehavior() {
+        // Si no se recibió TicketManager, creamos uno (para evitar NPE en diseñador).
+        if (this.ticketManager == null) {
+            this.ticketManager = new TicketManager();
+        }
+
+        // Botón Buscar y Enter en txtBuscar
+        btnBuscar.addActionListener(e -> buscarYFiltrarTickets());
+        txtBuscar.addActionListener(e -> buscarYFiltrarTickets());
+
+        // Botón Exportar -> exportar CSV (más compatible que POI sin configurar dependencias)
+        btnExportarExcel.addActionListener(e -> exportarTablaACSV());
+
+        // Manejo del filtro: si se selecciona ESTADO mostramos comboEstado, si no lo ocultamos.
+        comboFiltro.addActionListener(e -> {
+            String sel = String.valueOf(comboFiltro.getSelectedItem()).trim().toUpperCase();
+            // Si el usuario dejó el combo con estados (compatibilidad), también permitimos seleccionar estado directamente.
+            if ("ESTADO".equalsIgnoreCase(sel)) {
+                comboEstado.setVisible(true);
+                txtBuscar.setEnabled(false);
+                buscarYFiltrarTickets();
+            } else {
+                comboEstado.setVisible(false);
+                txtBuscar.setEnabled(true);
+            }
+        });
+
+        // Si cambia comboEstado, refrescar la búsqueda automáticamente
+        comboEstado.addActionListener(e -> {
+            if (comboEstado.isVisible()) buscarYFiltrarTickets();
+        });
+
+        // Volver
+        btnVolver.addActionListener(e -> {
+            if (parentWindow != null) parentWindow.setVisible(true);
+            dispose();
+        });
+    }
+
+    // Carga todos los tickets en la tabla
     private void cargarTickets() {
         DefaultTableModel model = (DefaultTableModel) tblistadetickets.getModel();
         model.setRowCount(0);
 
+        if (ticketManager == null) return;
         Ticket[] tickets = ticketManager.getAllTickets();
+        if (tickets == null) return;
+
         for (Ticket t : tickets) {
             model.addRow(new Object[]{
-                t.getId(), t.getCliente(), t.getDni(), t.getEquipo(), t.getDescripcion(),
-                t.getEstado(), t.getTecnico(), t.getPrioridad(), t.getFechaCreacion(), t.getFechaFin(),
-                t.getCorreo(), t.getCelular()
+                safe(t.getId()), safe(t.getCliente()), safe(t.getDni()), safe(t.getEquipo()), safe(t.getDescripcion()),
+                safe(t.getEstado()), safe(t.getTecnico()), safe(t.getPrioridad()), safe(t.getFechaCreacion()), safe(t.getFechaFin()),
+                safe(t.getCorreo()), safe(t.getCelular())
             });
         }
     }
 
+    /**
+     * Filtrado robusto. El comboFiltro puede tener:
+     * - "ID","DNI","ESTADO","DESCRIPCION"  (modo preferido)
+     * - O directamente los nombres de estado (ej. "ASIGNADO") — en cuyo caso lo tratamos como filtro por estado.
+     */
     private void buscarYFiltrarTickets() {
-                String filtro = comboFiltro.getSelectedItem().toString();
-    String texto = txtBuscar.getText().trim().toLowerCase();
+        String filtroSeleccionado = String.valueOf(comboFiltro.getSelectedItem()).trim();
+        String filtro = filtroSeleccionado.toUpperCase();
+        String texto = txtBuscar.getText() == null ? "" : txtBuscar.getText().trim().toLowerCase();
 
-    DefaultTableModel model = (DefaultTableModel) tblistadetickets.getModel();
-    model.setRowCount(0);
+        DefaultTableModel model = (DefaultTableModel) tblistadetickets.getModel();
+        model.setRowCount(0);
 
-    Ticket[] tickets = ticketManager.getAllTickets();
-    for (Ticket t : tickets) {
-        boolean coincide = false;
-        if (filtro.equals("ID")) {
-            coincide = t.getId().toLowerCase().contains(texto);
-        } else if (filtro.equals("DNI")) {
-            coincide = t.getDni().toLowerCase().contains(texto);
-        } else if (filtro.equals("ESTADO")) {
-            coincide = t.getEstado().toLowerCase().contains(texto);
-        } else if (filtro.equals("DESCRIPCION")) {
-            coincide = t.getDescripcion().toLowerCase().contains(texto);
-        }
-        if (coincide || texto.isEmpty()) {
-            model.addRow(new Object[]{
-                t.getId(), t.getCliente(), t.getDni(), t.getEquipo(), t.getDescripcion(),
-                t.getEstado(), t.getTecnico(), t.getPrioridad(), t.getFechaCreacion(), t.getFechaFin(),
-                t.getCorreo(), t.getCelular()
-            });
-        }
-    }
-}
+        if (ticketManager == null) return;
+        Ticket[] tickets = ticketManager.getAllTickets();
+        if (tickets == null) return;
 
-private void exportarTablaAExcel() {
-    JFileChooser chooser = new JFileChooser();
-    if (chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-        try {
-            org.apache.poi.ss.usermodel.Workbook workbook = new org.apache.poi.xssf.usermodel.XSSFWorkbook();
-            org.apache.poi.ss.usermodel.Sheet sheet = workbook.createSheet("Tickets");
-            DefaultTableModel model = (DefaultTableModel) tblistadetickets.getModel();
+        for (Ticket t : tickets) {
+            boolean coincide = false;
 
-            // Encabezados
-            org.apache.poi.ss.usermodel.Row headerRow = sheet.createRow(0);
-            for (int col = 0; col < model.getColumnCount(); col++) {
-                headerRow.createCell(col).setCellValue(model.getColumnName(col));
-            }
-
-            // Datos
-            for (int row = 0; row < model.getRowCount(); row++) {
-                org.apache.poi.ss.usermodel.Row excelRow = sheet.createRow(row + 1);
-                for (int col = 0; col < model.getColumnCount(); col++) {
-                    Object value = model.getValueAt(row, col);
-                    excelRow.createCell(col).setCellValue(value == null ? "" : value.toString());
+            // Si el combo trae uno de los tipos esperados:
+            if ("ID".equalsIgnoreCase(filtro)) {
+                if (texto.isEmpty()) coincide = true;
+                else if (t.getId() != null) coincide = t.getId().toLowerCase().contains(texto);
+            } else if ("DNI".equalsIgnoreCase(filtro)) {
+                if (texto.isEmpty()) coincide = true;
+                else if (t.getDni() != null) coincide = t.getDni().toLowerCase().contains(texto);
+            } else if ("DESCRIPCION".equalsIgnoreCase(filtro)) {
+                if (texto.isEmpty()) coincide = true;
+                else if (t.getDescripcion() != null) coincide = t.getDescripcion().toLowerCase().contains(texto);
+            } else if ("ESTADO".equalsIgnoreCase(filtro)) {
+                // usamos comboEstado para elegir estado concreto
+                String estadoSel = String.valueOf(comboEstado.getSelectedItem()).trim().toLowerCase();
+                if (estadoSel.isEmpty() || "TODOS".equalsIgnoreCase(estadoSel)) {
+                    coincide = true;
+                } else if (t.getEstado() != null) {
+                    coincide = t.getEstado().toLowerCase().contains(estadoSel);
+                }
+            } else {
+                // Compatibilidad: si el combo trae un nombre de estado directamente (ej. "ASIGNADO"),
+                // filtramos por ese estado y ignoramos txtBuscar.
+                String posibleEstado = filtro.toLowerCase();
+                if (t.getEstado() != null && t.getEstado().toLowerCase().contains(posibleEstado)) {
+                    coincide = true;
+                } else {
+                    // Si no es reconocido, caemos a búsqueda libre por texto (mostrar todo si texto vacío)
+                    if (texto.isEmpty()) coincide = true;
+                    else {
+                        // Buscar en varios campos como fallback
+                        if ((t.getId() != null && t.getId().toLowerCase().contains(texto))
+                                || (t.getDni() != null && t.getDni().toLowerCase().contains(texto))
+                                || (t.getDescripcion() != null && t.getDescripcion().toLowerCase().contains(texto))
+                                || (t.getEstado() != null && t.getEstado().toLowerCase().contains(texto))) {
+                            coincide = true;
+                        }
+                    }
                 }
             }
 
-            try (java.io.FileOutputStream fileOut = new java.io.FileOutputStream(chooser.getSelectedFile() + ".xlsx")) {
-                workbook.write(fileOut);
+            if (coincide) {
+                model.addRow(new Object[]{
+                    safe(t.getId()), safe(t.getCliente()), safe(t.getDni()), safe(t.getEquipo()), safe(t.getDescripcion()),
+                    safe(t.getEstado()), safe(t.getTecnico()), safe(t.getPrioridad()), safe(t.getFechaCreacion()), safe(t.getFechaFin()),
+                    safe(t.getCorreo()), safe(t.getCelular())
+                });
             }
-            workbook.close();
-            JOptionPane.showMessageDialog(this, "Exportado correctamente a Excel.");
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Error al exportar: " + e.getMessage());
         }
     }
-}
+
+    // Exporta la tabla mostrada a CSV (compatible y sin dependencias extra).
+    private void exportarTablaACSV() {
+        JFileChooser chooser = new JFileChooser();
+        if (chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+            try {
+                DefaultTableModel model = (DefaultTableModel) tblistadetickets.getModel();
+                File file = chooser.getSelectedFile();
+                try (Writer w = new OutputStreamWriter(new FileOutputStream(file + ".csv"), StandardCharsets.UTF_8);
+                     PrintWriter pw = new PrintWriter(w)) {
+
+                    // Encabezados
+                    for (int c = 0; c < model.getColumnCount(); c++) {
+                        pw.print("\"" + model.getColumnName(c).replace("\"", "\"\"") + "\"");
+                        if (c < model.getColumnCount() - 1) pw.print(",");
+                    }
+                    pw.println();
+
+                    // Filas
+                    for (int r = 0; r < model.getRowCount(); r++) {
+                        for (int c = 0; c < model.getColumnCount(); c++) {
+                            Object val = model.getValueAt(r, c);
+                            String cell = val == null ? "" : String.valueOf(val);
+                            cell = cell.replace("\"", "\"\"");
+                            pw.print("\"" + cell + "\"");
+                            if (c < model.getColumnCount() - 1) pw.print(",");
+                        }
+                        pw.println();
+                    }
+                }
+                JOptionPane.showMessageDialog(this, "Exportado correctamente a CSV.");
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "Error exportando CSV: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    private String safe(String s) {
+        return s == null ? "" : s;
+    }
+
+    // ------------------- UI generated code (modificado para incluir comboEstado) -------------------
     @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">
     private void initComponents() {
 
         tablalistausuarios = new javax.swing.JPanel();
@@ -159,6 +225,7 @@ private void exportarTablaAExcel() {
         lblBuscar = new javax.swing.JLabel();
         comboFiltro = new javax.swing.JComboBox<>();
         txtBuscar = new javax.swing.JTextField();
+        comboEstado = new javax.swing.JComboBox<>();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -184,18 +251,22 @@ private void exportarTablaAExcel() {
 
         btnVolver.setFont(new java.awt.Font("Decker", 0, 14)); // NOI18N
         btnVolver.setText("VOLVER");
-        btnVolver.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnVolverActionPerformed(evt);
-            }
-        });
         jPanel5.add(btnVolver, new org.netbeans.lib.awtextra.AbsoluteConstraints(460, 110, 100, 40));
 
         btnimprimirpdf.setFont(new java.awt.Font("Decker", 0, 14)); // NOI18N
         btnimprimirpdf.setText("IMPRIMIR PDF");
         btnimprimirpdf.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnimprimirpdfActionPerformed(evt);
+                try {
+                    boolean complete = tblistadetickets.print();
+                    if (complete) {
+                        JOptionPane.showMessageDialog(null, "Impresión completa.");
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Impresión cancelada.");
+                    }
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(null, "Error al imprimir: " + ex.getMessage());
+                }
             }
         });
         jPanel5.add(btnimprimirpdf, new org.netbeans.lib.awtextra.AbsoluteConstraints(640, 110, 142, 40));
@@ -207,16 +278,16 @@ private void exportarTablaAExcel() {
 
         btnBuscar.setText("Buscar");
 
-        btnExportarExcel.setText("Exportar a Excel");
+        btnExportarExcel.setText("Exportar a CSV"); // ahora exporta CSV para evitar dependencias
 
         lblBuscar.setText("Buscar por:");
 
-        comboFiltro.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "SELECCIONAR ESTADO", "ASIGNADO", "ATENCION", "SOLUCIONADO", "CANCELADO" }));
-        comboFiltro.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                comboFiltroActionPerformed(evt);
-            }
-        });
+        // Modelo recomendado del filtro: ID, DNI, ESTADO, DESCRIPCION
+        comboFiltro.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "ID", "DNI", "ESTADO", "DESCRIPCION" }));
+
+        // comboEstado (visible solo cuando se elige "ESTADO")
+        comboEstado.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "TODOS", "ASIGNADO", "ATENCION", "SOLUCIONADO", "CANCELADO" }));
+        comboEstado.setVisible(false);
 
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
@@ -227,18 +298,18 @@ private void exportarTablaAExcel() {
                 .addComponent(lblBuscar)
                 .addGap(18, 18, 18)
                 .addComponent(comboFiltro, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(50, 50, 50)
-                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel4Layout.createSequentialGroup()
-                        .addComponent(txtBuscar, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(btnBuscar)
-                        .addGap(48, 48, 48)
-                        .addComponent(btnExportarExcel)
-                        .addGap(248, 248, 248))
-                    .addGroup(jPanel4Layout.createSequentialGroup()
-                        .addComponent(txttoptech, javax.swing.GroupLayout.PREFERRED_SIZE, 256, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                .addGap(12, 12, 12)
+                .addComponent(comboEstado, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(8, 8, 8)
+                .addComponent(txtBuscar, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 40, Short.MAX_VALUE)
+                .addComponent(btnBuscar)
+                .addGap(48, 48, 48)
+                .addComponent(btnExportarExcel)
+                .addGap(248, 248, 248))
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addComponent(txttoptech, javax.swing.GroupLayout.PREFERRED_SIZE, 256, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 751, Short.MAX_VALUE))
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -251,7 +322,8 @@ private void exportarTablaAExcel() {
                     .addComponent(btnExportarExcel)
                     .addComponent(lblBuscar)
                     .addComponent(comboFiltro, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtBuscar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtBuscar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(comboEstado, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
 
@@ -262,14 +334,17 @@ private void exportarTablaAExcel() {
             .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(tablalistausuarios, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, 1272, Short.MAX_VALUE)
+                .addContainerGap())
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(tablalistausuarios, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(tablalistausuarios, javax.swing.GroupLayout.PREFERRED_SIZE, 355, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -277,76 +352,24 @@ private void exportarTablaAExcel() {
         );
 
         pack();
-    }// </editor-fold>//GEN-END:initComponents
-
-    
-    private void btnVolverActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVolverActionPerformed
-        // TODO add your handling code here:
-        if (parentWindow != null) {
-            parentWindow.setVisible(true);
-        }
-        this.dispose();
-    }//GEN-LAST:event_btnVolverActionPerformed
-
-    private void btnimprimirpdfActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnimprimirpdfActionPerformed
-        // TODO add your handling code here:
-        try {
-            boolean complete = tblistadetickets.print();
-            if (complete) {
-                JOptionPane.showMessageDialog(this, "Impresión completa.");
-            } else {
-                JOptionPane.showMessageDialog(this, "Impresión cancelada.");
-            }
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Error al imprimir: " + ex.getMessage());
-        }
-    }//GEN-LAST:event_btnimprimirpdfActionPerformed
-
-    private void comboFiltroActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_comboFiltroActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_comboFiltroActionPerformed
+    }// </editor-fold>
+    // ------------------- end UI generated code -------------------
 
     /**
-     * @param args the command line arguments
+     * Main para pruebas rápidas.
      */
     public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(ListTicketsWindow.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(ListTicketsWindow.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(ListTicketsWindow.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(ListTicketsWindow.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-        //</editor-fold>
-
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new ListTicketsWindow().setVisible(true);
-            }
+        java.awt.EventQueue.invokeLater(() -> {
+            new ListTicketsWindow().setVisible(true);
         });
     }
 
-    // Variables declaration - do not modify//GEN-BEGIN:variables
+    // Variables declaration - do not modify
     private javax.swing.JButton btnBuscar;
     private javax.swing.JButton btnExportarExcel;
     private javax.swing.JButton btnVolver;
     private javax.swing.JButton btnimprimirpdf;
+    private javax.swing.JComboBox<String> comboEstado;
     private javax.swing.JComboBox<String> comboFiltro;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
@@ -357,5 +380,5 @@ private void exportarTablaAExcel() {
     private javax.swing.JTable tblistadetickets;
     private javax.swing.JTextField txtBuscar;
     private javax.swing.JLabel txttoptech;
-    // End of variables declaration//GEN-END:variables
+    // End of variables declaration
 }
