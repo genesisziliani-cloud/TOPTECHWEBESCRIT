@@ -80,29 +80,33 @@ btnExportarExcel.addActionListener(new java.awt.event.ActionListener() {
     }
 
     private void buscarYFiltrarTickets() {
-        String filtro = comboFiltro.getSelectedItem().toString();
-        String texto = txtBuscar.getText().trim().toLowerCase();
+                String filtro = comboFiltro.getSelectedItem().toString();
+    String texto = txtBuscar.getText().trim().toLowerCase();
 
-        DefaultTableModel model = (DefaultTableModel) tblistadetickets.getModel();
-        model.setRowCount(0);
+    DefaultTableModel model = (DefaultTableModel) tblistadetickets.getModel();
+    model.setRowCount(0);
 
-        Ticket[] tickets = ticketManager.getAllTickets();
-        for (Ticket t : tickets) {
-            boolean coincide = false;
-            if (filtro.equals("ID")) {
-                coincide = String.valueOf(t.getId()).toLowerCase().contains(texto);
-            } else if (filtro.equals("DNI")) {
-                coincide = t.getDni().toLowerCase().contains(texto);
-            }
-            if (coincide || texto.isEmpty()) {
-                model.addRow(new Object[]{
-                    t.getId(), t.getCliente(), t.getDni(), t.getEquipo(), t.getDescripcion(),
-                    t.getEstado(), t.getTecnico(), t.getPrioridad(), t.getFechaCreacion(), t.getFechaFin(),
-                    t.getCorreo(), t.getCelular()
-                });
-            }
+    Ticket[] tickets = ticketManager.getAllTickets();
+    for (Ticket t : tickets) {
+        boolean coincide = false;
+        if (filtro.equals("ID")) {
+            coincide = t.getId().toLowerCase().contains(texto);
+        } else if (filtro.equals("DNI")) {
+            coincide = t.getDni().toLowerCase().contains(texto);
+        } else if (filtro.equals("ESTADO")) {
+            coincide = t.getEstado().toLowerCase().contains(texto);
+        } else if (filtro.equals("DESCRIPCION")) {
+            coincide = t.getDescripcion().toLowerCase().contains(texto);
+        }
+        if (coincide || texto.isEmpty()) {
+            model.addRow(new Object[]{
+                t.getId(), t.getCliente(), t.getDni(), t.getEquipo(), t.getDescripcion(),
+                t.getEstado(), t.getTecnico(), t.getPrioridad(), t.getFechaCreacion(), t.getFechaFin(),
+                t.getCorreo(), t.getCelular()
+            });
         }
     }
+}
 
 private void exportarTablaAExcel() {
     JFileChooser chooser = new JFileChooser();
