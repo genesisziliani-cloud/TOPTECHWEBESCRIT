@@ -16,7 +16,7 @@ public class Main {
         UserManager userManager = new UserManager();
         TicketManager ticketManager = new TicketManager();
 
-        // ✅ VERIFICAR si el usuario ya existe antes de crearlo
+        //VERIFICAR si el usuario ya existe antes de crearlo
         User usuarioExistente = userManager.findUserByDNI("00000000");
         if (usuarioExistente == null) {
             userManager.addUser(new User("00000000", "Admin", "Sistema", "admini", "admini", "ADMIN"));
@@ -25,7 +25,7 @@ public class Main {
             System.out.println("Usuario admin ya existe: " + usuarioExistente.getNombre() + " " + usuarioExistente.getApellido());
         }
 
-        // ✅ NUEVO: Configurar notificaciones por email
+        //Configurar notificaciones por email
         configurarNotificaciones(ticketManager);
 
         LoginWindow login = new LoginWindow(userManager, ticketManager);
@@ -42,7 +42,7 @@ public class Main {
                 ticketManager.addNotifier(emailNotifier);
                 System.out.println("Sistema de notificaciones por email configurado");
             } else {
-                System.err.println("No se encontró smtp.properties - Las notificaciones por email no funcionarán");
+                System.err.println("No se encontró smtp.properties - Las notificaciones por email no funcionaran");
             }
         } catch (Exception e) {
             System.err.println("Error configurando notificaciones: " + e.getMessage());
