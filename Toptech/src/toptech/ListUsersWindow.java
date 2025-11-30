@@ -18,6 +18,8 @@ import models.Ticket;
  * Filtros disponibles: Usuario, Nombre, Apellido, Rol, DNI Funcionalidades:
  * Filtrar, Exportar CSV, Imprimir PDF, Eliminar Usuario
  */
+
+//CODIGO ACTUALIZADO 29/11/2025
 public class ListUsersWindow extends javax.swing.JFrame {
 
     private UserManager userManager;
