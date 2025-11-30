@@ -110,6 +110,16 @@ public class TicketManager {
         }
     }
 
+    // Método wrapper para llamar al DAO
+    public int updateNombreByDni(String dni, String nuevoNombre) {
+        try {
+            return dao.updateNombreByDni(dni, nuevoNombre);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
     public Ticket[] getAllTickets() {
         try {
             List<Ticket> list = dao.getAllTickets();
