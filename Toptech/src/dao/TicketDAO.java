@@ -139,6 +139,17 @@ public class TicketDAO {
         return null;
     }
 
+    
+    // Nuevo método que actualiza el nombre en todos los tickets con el mismo DNI
+    public int updateNombreByDni(String dni, String nuevoNombre) throws SQLException {
+        String sql = "UPDATE Tickets SET cliente = ? WHERE dni = ?";
+        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, nuevoNombre);
+            ps.setString(2, dni);
+            return ps.executeUpdate(); // Retorna cantidad de filas actualizadas
+        }
+    }
+
     public List<Ticket> getTicketsByDNI(String dni) throws SQLException {
         return getTicketsByUserDni(dni); // Reutilizar el método corregido
     }
