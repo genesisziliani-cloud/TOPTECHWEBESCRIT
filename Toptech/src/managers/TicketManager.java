@@ -5,16 +5,26 @@ import models.Ticket;
 import utils.EmailSender;
 import utils.WhatsAppSender;
 import notifications.NotificationService;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.concurrent.CopyOnWriteArrayList;
 
+/**
+ * TicketManager actualizado:
+ * - notifiers usa CopyOnWriteArrayList para seguridad en concurrencia
+ * - addNotifier() evita duplicados
+ * - removeNotifier() permite desregistrar listeners (evita fugas y notificaciones duplicadas)
+ *
+ * Mantiene todos los métodos públicos originales (getAllTickets, addTicket, updateTicket, etc.)
+ */
 public class TicketManager {
-
     private TicketDAO dao;
     private static int nextId = 1;
-    private final List<NotificationService> notifiers = new ArrayList<>(); // ✅ NUEVO
+    // Uso CopyOnWriteArrayList para iterar/añadir/remover sin ConcurrentModificationException
+    private final List<NotificationService> notifiers = new CopyOnWriteArrayList<>();
 
     public TicketManager() {
         this.dao = new TicketDAO();
@@ -24,50 +34,66 @@ public class TicketManager {
         this.dao = new TicketDAO(connection);
     }
 
-    // ✅ NUEVO: Método para agregar notificadores
+    // Registro de notificador (evita duplicados)
     public void addNotifier(NotificationService notifier) {
-        if (notifier != null) {
+        if (notifier == null) return;
+        if (!notifiers.contains(notifier)) {
             notifiers.add(notifier);
         }
     }
 
-    // ✅ NUEVO: Método para notificar creación
+    // Nuevo: quitar notificador cuando la UI se cierre
+    public void removeNotifier(NotificationService notifier) {
+        if (notifier == null) return;
+        notifiers.remove(notifier);
+    }
+
+    // Notificar creación
     private void notificarCreacion(Ticket ticket) {
         for (NotificationService notifier : notifiers) {
-            notifier.onTicketCreated(ticket);
+            try {
+                notifier.onTicketCreated(ticket);
+            } catch (Exception e) {
+                // Protegemos para que un fallo en un listener no rompa el flujo
+                e.printStackTrace();
+            }
         }
     }
 
-    // ✅ NUEVO: Método para notificar actualización
+    // Notificar actualización
     private void notificarActualizacion(Ticket ticket, String estadoAnterior) {
         for (NotificationService notifier : notifiers) {
-            notifier.onTicketUpdated(ticket, estadoAnterior);
+            try {
+                notifier.onTicketUpdated(ticket, estadoAnterior);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
-    // ✅ MODIFICADO: addTicket con notificaciones
+    // Métodos visibles (mantengo la funcionalidad que ya tienes)
     public void addTicket(Ticket ticket) {
         try {
             dao.addTicket(ticket);
-            notificarCreacion(ticket); // ✅ NUEVA NOTIFICACIÓN
+            // notificar creación
+            notificarCreacion(ticket);
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    // ✅ MODIFICADO: updateTicket con notificaciones mejoradas
     public void updateTicket(Ticket ticket) {
         try {
-            // Obtener estado anterior antes de actualizar
+            // Obtener estado anterior
             Ticket ticketAnterior = dao.findById(ticket.getId());
             String estadoAnterior = (ticketAnterior != null) ? ticketAnterior.getEstado() : "DESCONOCIDO";
 
             dao.updateTicket(ticket);
 
-            // ✅ NUEVO: Sistema de notificaciones mejorado
+            // notificar a listeners
             notificarActualizacion(ticket, estadoAnterior);
 
-            // ✅ MANTENER: Notificaciones existentes (opcional - puedes eliminarlas)
+            // Mantener notificaciones existentes (email / whatsapp)
             EmailSender.send(ticket.getCorreo(), "Estado de su ticket",
                     "Su ticket " + ticket.getId() + " está en estado: " + ticket.getEstado());
             WhatsAppSender.send(ticket.getCelular(),
@@ -78,13 +104,12 @@ public class TicketManager {
         }
     }
 
-    // Los demás métodos se mantienen igual...
     public List<Ticket> getTicketsByUserDni(String dni) {
         try {
             return dao.getTicketsByDNI(dni);
         } catch (SQLException e) {
-            System.err.println("❌ Error en getTicketsByUserDni: " + e.getMessage());
-            return null;
+            e.printStackTrace();
+            return new ArrayList<>();
         }
     }
 
@@ -98,25 +123,6 @@ public class TicketManager {
         } catch (SQLException e) {
             e.printStackTrace();
             return null;
-        }
-    }
-
-    public String getNombreByDni(String dni) {
-        try {
-            List<Ticket> tickets = dao.getTicketsByUserDni(dni);
-            return (tickets != null && !tickets.isEmpty()) ? tickets.get(0).getCliente() : null;
-        } catch (SQLException e) {
-            return null;
-        }
-    }
-
-    // Método wrapper para llamar al DAO
-    public int updateNombreByDni(String dni, String nuevoNombre) {
-        try {
-            return dao.updateNombreByDni(dni, nuevoNombre);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return 0;
         }
     }
 

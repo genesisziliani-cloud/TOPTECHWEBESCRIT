@@ -4,12 +4,12 @@
  */
 package toptech;
 
+import java.io.InputStream;
+import java.util.Properties;
 import managers.UserManager;
 import managers.TicketManager;
 import models.User;
 import notifications.EmailNotificationService;
-import java.io.InputStream;
-import java.util.Properties;
 
 public class Main {
     public static void main(String[] args) {
@@ -42,7 +42,7 @@ public class Main {
                 ticketManager.addNotifier(emailNotifier);
                 System.out.println("Sistema de notificaciones por email configurado");
             } else {
-                System.err.println("No se encontró smtp.properties - Las notificaciones por email no funcionaran");
+                System.err.println("No se encontro smtp.properties - Las notificaciones por email no funcionaran");
             }
         } catch (Exception e) {
             System.err.println("Error configurando notificaciones: " + e.getMessage());

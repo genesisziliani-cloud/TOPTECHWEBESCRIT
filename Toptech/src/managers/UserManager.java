@@ -49,6 +49,7 @@ public class UserManager {
         }
     }
 
+    // ✅ AGREGAR este método en UserManager
     public User getClienteByDni(String dni) {
         try {
             return dao.findClienteByDNI(dni);  // ✅ Llama al método del DAO

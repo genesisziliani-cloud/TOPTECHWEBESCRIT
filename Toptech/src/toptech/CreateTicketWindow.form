@@ -59,102 +59,97 @@
               <Group type="102" attributes="0">
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="102" alignment="0" attributes="0">
+                          <EmptySpace min="-2" pref="50" max="-2" attributes="0"/>
+                          <Component id="txttoptech" min="-2" pref="270" max="-2" attributes="0"/>
+                      </Group>
+                      <Group type="102" alignment="0" attributes="0">
+                          <EmptySpace min="-2" pref="20" max="-2" attributes="0"/>
+                          <Component id="jSeparator1" min="-2" pref="450" max="-2" attributes="0"/>
+                      </Group>
+                      <Group type="102" alignment="0" attributes="0">
+                          <EmptySpace min="-2" pref="168" max="-2" attributes="0"/>
+                          <Component id="filler1" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace min="-2" pref="143" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
+                              <Component id="jScrollPane6" min="-2" pref="198" max="-2" attributes="0"/>
+                              <Component id="estado" alignment="0" min="-2" pref="133" max="-2" attributes="0"/>
+                              <Component id="equipo" alignment="0" min="-2" pref="133" max="-2" attributes="0"/>
+                              <Component id="jScrollPane8" min="-2" pref="198" max="-2" attributes="0"/>
+                              <Component id="jScrollPane4" min="-2" pref="329" max="-2" attributes="0"/>
+                              <Component id="prioridad" alignment="0" min="-2" pref="133" max="-2" attributes="0"/>
+                              <Component id="jScrollPane9" alignment="0" min="-2" pref="198" max="-2" attributes="0"/>
+                              <Component id="jScrollPane11" alignment="0" min="-2" pref="198" max="-2" attributes="0"/>
+                              <Component id="jScrollPane10" alignment="0" min="-2" pref="198" max="-2" attributes="0"/>
                               <Group type="102" alignment="0" attributes="0">
-                                  <EmptySpace max="-2" attributes="0"/>
-                                  <Component id="jPanel3" min="-2" pref="10" max="-2" attributes="0"/>
-                                  <Group type="103" groupAlignment="0" attributes="0">
-                                      <Group type="102" alignment="0" attributes="0">
-                                          <EmptySpace min="-2" pref="12" max="-2" attributes="0"/>
-                                          <Group type="103" groupAlignment="0" attributes="0">
-                                              <Component id="jSeparator2" min="-2" pref="710" max="-2" attributes="0"/>
-                                              <Group type="103" groupAlignment="1" attributes="0">
-                                                  <Component id="txtcrearticket" min="-2" max="-2" attributes="0"/>
-                                                  <Component id="txtcrearticket1" min="-2" max="-2" attributes="0"/>
-                                              </Group>
-                                          </Group>
-                                      </Group>
-                                      <Group type="102" alignment="1" attributes="0">
-                                          <Group type="103" groupAlignment="0" attributes="0">
-                                              <Group type="102" alignment="0" attributes="0">
-                                                  <EmptySpace min="-2" pref="66" max="-2" attributes="0"/>
-                                                  <Group type="103" groupAlignment="1" attributes="0">
-                                                      <Component id="txtprioridad" min="-2" max="-2" attributes="0"/>
-                                                      <Component id="txtDNI" min="-2" max="-2" attributes="0"/>
-                                                      <Component id="txtequipotitu" min="-2" max="-2" attributes="0"/>
-                                                      <Component id="txtclientetitu" alignment="1" min="-2" max="-2" attributes="0"/>
-                                                      <Component id="txtcorreo" alignment="1" min="-2" max="-2" attributes="0"/>
-                                                      <Component id="txtcelular" alignment="1" min="-2" max="-2" attributes="0"/>
-                                                  </Group>
-                                              </Group>
-                                              <Group type="102" alignment="0" attributes="0">
-                                                  <EmptySpace min="-2" pref="87" max="-2" attributes="0"/>
-                                                  <Component id="txtestadotitu" min="-2" max="-2" attributes="0"/>
-                                              </Group>
-                                          </Group>
-                                          <EmptySpace min="-2" pref="594" max="-2" attributes="0"/>
-                                      </Group>
-                                      <Group type="102" alignment="1" attributes="0">
-                                          <EmptySpace min="-2" pref="49" max="-2" attributes="0"/>
-                                          <Group type="103" groupAlignment="0" attributes="0">
-                                              <Component id="txttecnico" alignment="1" min="-2" max="-2" attributes="0"/>
-                                              <Component id="txtDescripcion" alignment="1" min="-2" max="-2" attributes="0"/>
-                                          </Group>
-                                          <EmptySpace min="598" pref="598" max="-2" attributes="0"/>
-                                      </Group>
-                                      <Group type="102" alignment="0" attributes="0">
-                                          <EmptySpace min="-2" pref="295" max="-2" attributes="0"/>
-                                          <Component id="chkDiagnosticoPagado" min="-2" max="-2" attributes="0"/>
-                                      </Group>
-                                  </Group>
-                              </Group>
-                              <Group type="102" alignment="0" attributes="0">
-                                  <EmptySpace min="-2" pref="50" max="-2" attributes="0"/>
-                                  <Component id="txttoptech" min="-2" pref="270" max="-2" attributes="0"/>
-                              </Group>
-                              <Group type="102" alignment="0" attributes="0">
-                                  <EmptySpace min="-2" pref="20" max="-2" attributes="0"/>
-                                  <Component id="jSeparator1" min="-2" pref="450" max="-2" attributes="0"/>
-                              </Group>
-                              <Group type="102" alignment="0" attributes="0">
-                                  <EmptySpace min="-2" pref="168" max="-2" attributes="0"/>
-                                  <Component id="filler1" min="-2" max="-2" attributes="0"/>
-                                  <EmptySpace min="-2" pref="143" max="-2" attributes="0"/>
-                                  <Group type="103" groupAlignment="0" attributes="0">
-                                      <Component id="tecnicos" min="-2" pref="133" max="-2" attributes="0"/>
-                                      <Component id="jScrollPane6" min="-2" pref="198" max="-2" attributes="0"/>
-                                      <Component id="estado" alignment="0" min="-2" pref="133" max="-2" attributes="0"/>
-                                      <Component id="equipo" alignment="0" min="-2" pref="133" max="-2" attributes="0"/>
-                                      <Component id="jScrollPane8" min="-2" pref="198" max="-2" attributes="0"/>
-                                      <Component id="jScrollPane4" min="-2" pref="329" max="-2" attributes="0"/>
-                                      <Component id="prioridad" alignment="0" min="-2" pref="133" max="-2" attributes="0"/>
-                                      <Component id="jScrollPane9" alignment="0" min="-2" pref="198" max="-2" attributes="0"/>
-                                      <Component id="jScrollPane11" alignment="0" min="-2" pref="198" max="-2" attributes="0"/>
-                                      <Component id="jScrollPane10" alignment="0" min="-2" pref="198" max="-2" attributes="0"/>
-                                  </Group>
-                              </Group>
-                          </Group>
-                          <EmptySpace max="-2" attributes="0"/>
-                          <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="logo" min="-2" pref="248" max="-2" attributes="0"/>
-                              <Group type="102" alignment="0" attributes="0">
-                                  <Group type="103" groupAlignment="1" attributes="0">
-                                      <Component id="txtcreaciontitu" min="-2" max="-2" attributes="0"/>
-                                      <Component id="txtfechafintitu" min="-2" max="-2" attributes="0"/>
-                                  </Group>
-                                  <EmptySpace type="separate" max="-2" attributes="0"/>
-                                  <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                                      <Component id="jScrollPane7" pref="125" max="32767" attributes="0"/>
-                                      <Component id="jScrollPane5" max="32767" attributes="0"/>
-                                  </Group>
+                                  <Component id="tecnicos" min="-2" pref="133" max="-2" attributes="0"/>
+                                  <EmptySpace min="-2" pref="17" max="-2" attributes="0"/>
+                                  <Component id="btnGuardar" min="-2" pref="140" max="-2" attributes="0"/>
+                                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                                  <Component id="btnCancelar" min="-2" pref="140" max="-2" attributes="0"/>
                               </Group>
                           </Group>
                       </Group>
                       <Group type="102" alignment="0" attributes="0">
-                          <EmptySpace min="-2" pref="399" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="jPanel3" min="-2" pref="10" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="btnGuardar" min="-2" pref="140" max="-2" attributes="0"/>
-                              <Component id="btnCancelar" min="-2" pref="140" max="-2" attributes="0"/>
+                              <Group type="102" alignment="0" attributes="0">
+                                  <EmptySpace min="-2" pref="12" max="-2" attributes="0"/>
+                                  <Group type="103" groupAlignment="0" attributes="0">
+                                      <Component id="jSeparator2" min="-2" pref="710" max="-2" attributes="0"/>
+                                      <Group type="103" groupAlignment="1" attributes="0">
+                                          <Component id="txtcrearticket" min="-2" max="-2" attributes="0"/>
+                                          <Component id="txtcrearticket1" min="-2" max="-2" attributes="0"/>
+                                      </Group>
+                                  </Group>
+                              </Group>
+                              <Group type="102" alignment="1" attributes="0">
+                                  <Group type="103" groupAlignment="0" attributes="0">
+                                      <Group type="102" alignment="0" attributes="0">
+                                          <EmptySpace min="-2" pref="66" max="-2" attributes="0"/>
+                                          <Group type="103" groupAlignment="1" attributes="0">
+                                              <Component id="txtprioridad" min="-2" max="-2" attributes="0"/>
+                                              <Component id="txtDNI" min="-2" max="-2" attributes="0"/>
+                                              <Component id="txtequipotitu" min="-2" max="-2" attributes="0"/>
+                                              <Component id="txtclientetitu" alignment="1" min="-2" max="-2" attributes="0"/>
+                                              <Component id="txtcorreo" alignment="1" min="-2" max="-2" attributes="0"/>
+                                              <Component id="txtcelular" alignment="1" min="-2" max="-2" attributes="0"/>
+                                          </Group>
+                                      </Group>
+                                      <Group type="102" alignment="0" attributes="0">
+                                          <EmptySpace min="-2" pref="87" max="-2" attributes="0"/>
+                                          <Component id="txtestadotitu" min="-2" max="-2" attributes="0"/>
+                                      </Group>
+                                  </Group>
+                                  <EmptySpace min="-2" pref="594" max="-2" attributes="0"/>
+                              </Group>
+                              <Group type="102" alignment="1" attributes="0">
+                                  <EmptySpace min="-2" pref="49" max="-2" attributes="0"/>
+                                  <Group type="103" groupAlignment="0" attributes="0">
+                                      <Component id="txttecnico" alignment="1" min="-2" max="-2" attributes="0"/>
+                                      <Component id="txtDescripcion" alignment="1" min="-2" max="-2" attributes="0"/>
+                                  </Group>
+                                  <EmptySpace min="598" pref="598" max="-2" attributes="0"/>
+                              </Group>
+                              <Group type="102" alignment="0" attributes="0">
+                                  <EmptySpace min="-2" pref="295" max="-2" attributes="0"/>
+                                  <Component id="chkDiagnosticoPagado" min="-2" max="-2" attributes="0"/>
+                              </Group>
+                          </Group>
+                      </Group>
+                  </Group>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="0" attributes="0">
+                      <Component id="logo" min="-2" pref="248" max="-2" attributes="0"/>
+                      <Group type="102" alignment="0" attributes="0">
+                          <Group type="103" groupAlignment="1" attributes="0">
+                              <Component id="txtcreaciontitu" min="-2" max="-2" attributes="0"/>
+                              <Component id="txtfechafintitu" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                          <EmptySpace type="separate" max="-2" attributes="0"/>
+                          <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                              <Component id="jScrollPane7" pref="125" max="32767" attributes="0"/>
+                              <Component id="jScrollPane5" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                   </Group>
@@ -255,8 +250,10 @@
                                           <Group type="103" groupAlignment="3" attributes="0">
                                               <Component id="txttecnico" alignment="3" min="-2" max="-2" attributes="0"/>
                                               <Component id="tecnicos" alignment="3" min="-2" max="-2" attributes="0"/>
+                                              <Component id="btnGuardar" alignment="3" min="-2" pref="40" max="-2" attributes="0"/>
+                                              <Component id="btnCancelar" alignment="3" min="-2" pref="50" max="-2" attributes="0"/>
                                           </Group>
-                                          <EmptySpace min="-2" pref="25" max="-2" attributes="0"/>
+                                          <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
                                           <Component id="jSeparator2" max="32767" attributes="0"/>
                                       </Group>
                                       <Group type="102" attributes="0">
@@ -268,11 +265,7 @@
                           </Group>
                       </Group>
                   </Group>
-                  <EmptySpace max="-2" attributes="0"/>
-                  <Component id="btnGuardar" min="-2" pref="40" max="-2" attributes="0"/>
-                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                  <Component id="btnCancelar" min="-2" pref="50" max="-2" attributes="0"/>
-                  <EmptySpace min="-2" pref="63" max="-2" attributes="0"/>
+                  <EmptySpace min="-2" pref="171" max="-2" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>

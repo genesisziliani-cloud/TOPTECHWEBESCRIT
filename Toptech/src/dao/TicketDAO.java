@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TicketDAO {
-
     private Connection connection;
 
     public TicketDAO() {
@@ -26,102 +25,39 @@ public class TicketDAO {
         }
     }
 
-    // ✅ CORREGIDO: Método mejorado para obtener tickets por DNI
-    public List<Ticket> getTicketsByUserDni(String dni) throws SQLException {
-        List<Ticket> lista = new ArrayList<>();
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-
-        try {
-            conn = getConnection();
-
-            // ✅ PRIMERO intentar con la tabla Tickets
-            String sql = "SELECT * FROM Tickets WHERE dni = ?";
-            ps = conn.prepareStatement(sql);
-            ps.setString(1, dni);
-            rs = ps.executeQuery();
-
-            while (rs.next()) {
-                lista.add(buildTicket(rs));
-            }
-
-            // ✅ SI no hay resultados, intentar con otra tabla
-            if (lista.isEmpty()) {
-                System.out.println("ℹ️ No se encontraron tickets en tabla 'Tickets', buscando en otras tablas...");
-
-                // Cerrar recursos anteriores
-                if (rs != null) {
-                    rs.close();
-                }
-                if (ps != null) {
-                    ps.close();
-                }
-
-                // Intentar con tabla tickets (minúscula)
-                sql = "SELECT * FROM tickets WHERE dni = ?";
-                ps = conn.prepareStatement(sql);
-                ps.setString(1, dni);
-                rs = ps.executeQuery();
-
-                while (rs.next()) {
-                    lista.add(buildTicket(rs));
-                }
-            }
-
-            System.out.println("Tickets encontrados para DNI " + dni + ": " + lista.size());
-            return lista;
-
-        } finally {
-            // Cerrar recursos
-            if (rs != null) try {
-                rs.close();
-            } catch (Exception e) {
-            }
-            if (ps != null) try {
-                ps.close();
-            } catch (Exception e) {
-            }
-            // NO cerrar conn aquí si fue proporcionada externamente
-            if (this.connection == null && conn != null) {
-                try {
-                    conn.close();
-                } catch (Exception e) {
-                }
-            }
-        }
-    }
-
-    // ✅ Mantener todos tus métodos originales...
+    // Método para añadir ticket (mantengo igual)
     public void addTicket(Ticket t) throws SQLException {
         String sql = "INSERT INTO Tickets (codigo, cliente, dni, equipo, descripcion, estado, tecnico, prioridad, fechaCreacion, fechaFin, correo, celular, diagnosticoPagado, montoReparacion) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+                   + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
             fillStatement(ps, t);
             ps.executeUpdate();
         }
     }
 
+    // CORRECCIÓN: updateTicket con parámetros en el orden correcto del UPDATE SQL.
     public void updateTicket(Ticket t) throws SQLException {
-        String sql = "UPDATE Tickets SET cliente=?, equipo=?, descripcion=?, estado=?, tecnico=?, prioridad=?, "
-                + "fechaCreacion=?, fechaFin=?, correo=?, celular=?, diagnosticoPagado=?, montoReparacion=? "
-                + "WHERE codigo=?";
+        String sql = "UPDATE Tickets SET cliente=?, dni=?, equipo=?, descripcion=?, estado=?, tecnico=?, prioridad=?, fechaCreacion=?, fechaFin=?, correo=?, celular=?, diagnosticoPagado=?, montoReparacion=? "
+                   + "WHERE codigo=?";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
 
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setString(1, t.getCliente());
-            ps.setString(2, t.getEquipo());
-            ps.setString(3, t.getDescripcion());
-            ps.setString(4, t.getEstado());
-            ps.setString(5, t.getTecnico());
-            ps.setString(6, t.getPrioridad());
-            ps.setString(7, t.getFechaCreacion());
-            ps.setString(8, t.getFechaFin());
-            ps.setString(9, t.getCorreo());
-            ps.setString(10, t.getCelular());
-            ps.setBoolean(11, t.isDiagnosticoPagado());
-            ps.setDouble(12, t.getMontoReparacion());
-            ps.setString(13, t.getId());  // WHERE codigo=?
+            // Establecer parámetros en el mismo orden que aparecen en la sentencia UPDATE
+            ps.setString(1, t.getCliente());                 // cliente=?
+            ps.setString(2, t.getDni());                     // dni=?
+            ps.setString(3, t.getEquipo());                  // equipo=?
+            ps.setString(4, t.getDescripcion());             // descripcion=?
+            ps.setString(5, t.getEstado());                  // estado=?
+            ps.setString(6, t.getTecnico());                 // tecnico=?
+            ps.setString(7, t.getPrioridad());               // prioridad=?
+            ps.setString(8, t.getFechaCreacion());           // fechaCreacion=?
+            ps.setString(9, t.getFechaFin());                // fechaFin=?
+            ps.setString(10, t.getCorreo());                 // correo=?
+            ps.setString(11, t.getCelular());                // celular=?
+            ps.setBoolean(12, t.isDiagnosticoPagado());      // diagnosticoPagado=?
+            ps.setDouble(13, t.getMontoReparacion());       // montoReparacion=?
+            ps.setString(14, t.getId());                    // WHERE codigo=?
 
             ps.executeUpdate();
         }
@@ -129,7 +65,8 @@ public class TicketDAO {
 
     public Ticket findById(String id) throws SQLException {
         String sql = "SELECT * FROM Tickets WHERE codigo = ?";
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, id);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
@@ -139,25 +76,62 @@ public class TicketDAO {
         return null;
     }
 
-    
-    // Nuevo método que actualiza el nombre en todos los tickets con el mismo DNI
-    public int updateNombreByDni(String dni, String nuevoNombre) throws SQLException {
-        String sql = "UPDATE Tickets SET cliente = ? WHERE dni = ?";
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, nuevoNombre);
-            ps.setString(2, dni);
-            return ps.executeUpdate(); // Retorna cantidad de filas actualizadas
-        }
-    }
-
     public List<Ticket> getTicketsByDNI(String dni) throws SQLException {
         return getTicketsByUserDni(dni); // Reutilizar el método corregido
+    }
+
+    // CORREGIDO: Método robusto para obtener tickets por DNI (ya lo tenías bien)
+    public List<Ticket> getTicketsByUserDni(String dni) throws SQLException {
+        List<Ticket> lista = new ArrayList<>();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        
+        try {
+            conn = getConnection();
+            
+            // Intentar con tabla Tickets (mayúscula)
+            String sql = "SELECT * FROM Tickets WHERE dni = ?";
+            ps = conn.prepareStatement(sql);
+            ps.setString(1, dni);
+            rs = ps.executeQuery();
+            
+            while (rs.next()) {
+                lista.add(buildTicket(rs));
+            }
+            
+            // Si no hay resultados, intentar con tabla tickets (minúscula)
+            if (lista.isEmpty()) {
+                if (rs != null) { rs.close(); }
+                if (ps != null) { ps.close(); }
+                
+                sql = "SELECT * FROM tickets WHERE dni = ?";
+                ps = conn.prepareStatement(sql);
+                ps.setString(1, dni);
+                rs = ps.executeQuery();
+                
+                while (rs.next()) {
+                    lista.add(buildTicket(rs));
+                }
+            }
+            
+            return lista;
+            
+        } finally {
+            if (rs != null) try { rs.close(); } catch (Exception e) {}
+            if (ps != null) try { ps.close(); } catch (Exception e) {}
+            if (this.connection == null && conn != null) {
+                try { conn.close(); } catch (Exception e) {}
+            }
+        }
     }
 
     public List<Ticket> getAllTickets() throws SQLException {
         List<Ticket> lista = new ArrayList<>();
         String sql = "SELECT * FROM Tickets";
-        try (Connection conn = getConnection(); Statement st = conn.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+        try (Connection conn = getConnection();
+             Statement st = conn.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
             while (rs.next()) {
                 lista.add(buildTicket(rs));
             }
@@ -167,8 +141,10 @@ public class TicketDAO {
 
     public String generarCodigoTicket() {
         String codigo = "TK001";
-        String sql = "SELECT codigo FROM Tickets ORDER BY id_ticket DESC LIMIT 1";
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+        String sql = "SELECT codigo FROM Tickets ORDER BY id_ticket DESC LIMIT 1";  
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
             if (rs.next()) {
                 String ultimoCodigo = rs.getString("codigo");
                 if (ultimoCodigo != null && ultimoCodigo.startsWith("TK")) {
@@ -183,6 +159,7 @@ public class TicketDAO {
     }
 
     private void fillStatement(PreparedStatement ps, Ticket t) throws SQLException {
+        // Este método se usa para INSERT (el orden aquí coincide con el INSERT SQL)
         ps.setString(1, t.getId());
         ps.setString(2, t.getCliente());
         ps.setString(3, t.getDni());
@@ -201,20 +178,20 @@ public class TicketDAO {
 
     private Ticket buildTicket(ResultSet rs) throws SQLException {
         return new Ticket(
-                rs.getString("codigo"),
-                rs.getString("cliente"),
-                rs.getString("dni"),
-                rs.getString("equipo"),
-                rs.getString("descripcion"),
-                rs.getString("estado"),
-                rs.getString("tecnico"),
-                rs.getString("prioridad"),
-                rs.getString("fechaCreacion"),
-                rs.getString("fechaFin"),
-                rs.getString("correo"),
-                rs.getString("celular"),
-                rs.getBoolean("diagnosticoPagado"),
-                rs.getDouble("montoReparacion")
+            rs.getString("codigo"),
+            rs.getString("cliente"),
+            rs.getString("dni"),
+            rs.getString("equipo"),
+            rs.getString("descripcion"),
+            rs.getString("estado"),
+            rs.getString("tecnico"),
+            rs.getString("prioridad"),
+            rs.getString("fechaCreacion"),
+            rs.getString("fechaFin"),
+            rs.getString("correo"),
+            rs.getString("celular"),
+            rs.getBoolean("diagnosticoPagado"),
+            rs.getDouble("montoReparacion")
         );
     }
 }

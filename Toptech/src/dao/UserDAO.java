@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UserDAO {
-
     private Connection connection;
 
     public UserDAO() {
@@ -32,44 +31,18 @@ public class UserDAO {
 
     public User findByUsuarioAndPassword(String usuario, String contrasena) throws SQLException {
         String sql = "SELECT * FROM Usuarios WHERE usuario = ? AND contrasena = ?";
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = getConnection(); 
+             PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, usuario);
             ps.setString(2, contrasena);
             ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                return buildUser(rs);
-            }
+            if (rs.next()) return buildUser(rs);
         }
         return null;
     }
-
-    public void addUser(User u) throws SQLException {
-        String sql = "INSERT INTO Usuarios (dni, nombre, apellido, usuario, contrasena, rol) VALUES (?, ?, ?, ?, ?, ?)";
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, u.getDni());
-            ps.setString(2, u.getNombre());
-            ps.setString(3, u.getApellido());
-            ps.setString(4, u.getUsuario());
-            ps.setString(5, u.getContrasena());
-            ps.setString(6, u.getRol());
-            ps.executeUpdate();
-        }
-    }
-
-    public User findByUsuario(String usuario) throws SQLException {
-        String sql = "SELECT * FROM Usuarios WHERE usuario = ?";
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, usuario);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                return buildUser(rs);
-            }
-        }
-        return null;
-    }
-
+    
     public User findClienteByDNI(String dni) throws SQLException {
-        // Buscar en la tabla Tickets (para clientes)
+        // ✅ CORREGIDO: usar los nombres reales de las columnas
         String sql = "SELECT DISTINCT dni, cliente "
                 + "FROM Tickets WHERE dni = ? LIMIT 1";
 
@@ -81,7 +54,10 @@ public class UserDAO {
                 User cliente = new User();
                 cliente.setDni(rs.getString("dni"));
 
+                // La columna "cliente" parece tener el nombre completo
                 String nombreCompleto = rs.getString("cliente");
+
+                // Separar nombre y apellido si están juntos
                 if (nombreCompleto != null && nombreCompleto.contains(" ")) {
                     String[] partes = nombreCompleto.split(" ", 2);
                     cliente.setNombre(partes[0]);
@@ -98,14 +74,38 @@ public class UserDAO {
         return null;
     }
 
+    public void addUser(User u) throws SQLException {
+        String sql = "INSERT INTO Usuarios (dni, nombre, apellido, usuario, contrasena, rol) VALUES (?, ?, ?, ?, ?, ?)";
+        try (Connection conn = getConnection(); 
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, u.getDni());
+            ps.setString(2, u.getNombre());
+            ps.setString(3, u.getApellido());
+            ps.setString(4, u.getUsuario());
+            ps.setString(5, u.getContrasena());
+            ps.setString(6, u.getRol());
+            ps.executeUpdate();
+        }
+    }
+
+    public User findByUsuario(String usuario) throws SQLException {
+        String sql = "SELECT * FROM Usuarios WHERE usuario = ?";
+        try (Connection conn = getConnection(); 
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, usuario);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) return buildUser(rs);
+        }
+        return null;
+    }
+
     public User findByDNI(String dni) throws SQLException {
         String sql = "SELECT * FROM Usuarios WHERE dni = ?";
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = getConnection(); 
+             PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, dni);
             ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                return buildUser(rs);
-            }
+            if (rs.next()) return buildUser(rs);
         }
         return null;
     }
@@ -113,18 +113,18 @@ public class UserDAO {
     public List<User> getAllUsers() throws SQLException {
         List<User> out = new ArrayList<>();
         String sql = "SELECT * FROM Usuarios";
-        try (Connection conn = getConnection(); Statement st = conn.createStatement()) {
+        try (Connection conn = getConnection(); 
+             Statement st = conn.createStatement()) {
             ResultSet rs = st.executeQuery(sql);
-            while (rs.next()) {
-                out.add(buildUser(rs));
-            }
+            while (rs.next()) out.add(buildUser(rs));
         }
         return out;
     }
 
     public boolean deleteByDNI(String dni) throws SQLException {
         String sql = "DELETE FROM Usuarios WHERE dni = ?";
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = getConnection(); 
+             PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, dni);
             return ps.executeUpdate() > 0;
         }
@@ -133,17 +133,17 @@ public class UserDAO {
     // ✅ CORREGIDO: usar idUsuario en lugar de id
     private User buildUser(ResultSet rs) throws SQLException {
         User user = new User();
-
+        
         // ✅ CORREGIDO: usar idUsuario
         user.setId(rs.getInt("idUsuario"));
-
+        
         user.setDni(rs.getString("dni"));
         user.setNombre(rs.getString("nombre"));
         user.setApellido(rs.getString("apellido"));
         user.setUsuario(rs.getString("usuario"));
         user.setContrasena(rs.getString("contrasena"));
         user.setRol(rs.getString("rol"));
-
+        
         return user;
     }
 }

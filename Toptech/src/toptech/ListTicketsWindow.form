@@ -28,7 +28,10 @@
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
                   <Component id="jPanel5" max="32767" attributes="0"/>
-                  <Component id="tablalistausuarios" alignment="0" max="32767" attributes="0"/>
+                  <Group type="102" alignment="1" attributes="0">
+                      <Component id="tablalistausuarios" max="32767" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                  </Group>
               </Group>
           </Group>
       </Group>
@@ -36,11 +39,12 @@
     <DimensionLayout dim="1">
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="0" attributes="0">
-              <Component id="jPanel4" max="32767" attributes="0"/>
-              <EmptySpace max="-2" attributes="0"/>
+              <Component id="jPanel4" min="-2" pref="88" max="-2" attributes="0"/>
+              <EmptySpace type="separate" max="-2" attributes="0"/>
               <Component id="tablalistausuarios" min="-2" pref="355" max="-2" attributes="0"/>
-              <EmptySpace max="-2" attributes="0"/>
-              <Component id="jPanel5" min="-2" pref="166" max="-2" attributes="0"/>
+              <EmptySpace type="separate" max="-2" attributes="0"/>
+              <Component id="jPanel5" min="-2" pref="70" max="-2" attributes="0"/>
+              <EmptySpace max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -198,7 +202,7 @@
           </Events>
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
-              <AbsoluteConstraints x="460" y="110" width="100" height="40"/>
+              <AbsoluteConstraints x="410" y="20" width="100" height="40"/>
             </Constraint>
           </Constraints>
         </Component>
@@ -214,7 +218,7 @@
           </Events>
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
-              <AbsoluteConstraints x="640" y="110" width="142" height="40"/>
+              <AbsoluteConstraints x="620" y="20" width="142" height="40"/>
             </Constraint>
           </Constraints>
         </Component>
@@ -231,25 +235,9 @@
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="0" attributes="0">
-                  <EmptySpace min="-2" pref="172" max="-2" attributes="0"/>
-                  <Component id="lblBuscar" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace type="separate" max="-2" attributes="0"/>
-                  <Component id="comboFiltro" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace min="-2" pref="50" max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="0" attributes="0">
-                      <Group type="102" attributes="0">
-                          <Component id="txtBuscar" min="-2" pref="165" max="-2" attributes="0"/>
-                          <EmptySpace max="32767" attributes="0"/>
-                          <Component id="btnBuscar" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace min="-2" pref="48" max="-2" attributes="0"/>
-                          <Component id="btnExportarExcel" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace min="-2" pref="248" max="-2" attributes="0"/>
-                      </Group>
-                      <Group type="102" attributes="0">
-                          <Component id="txttoptech" min="-2" pref="256" max="-2" attributes="0"/>
-                          <EmptySpace min="576" max="32767" attributes="0"/>
-                      </Group>
-                  </Group>
+                  <EmptySpace min="450" pref="450" max="-2" attributes="0"/>
+                  <Component id="txttoptech" min="-2" pref="256" max="-2" attributes="0"/>
+                  <EmptySpace min="-2" pref="576" max="-2" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -258,15 +246,7 @@
               <Group type="102" alignment="0" attributes="0">
                   <EmptySpace min="10" pref="10" max="-2" attributes="0"/>
                   <Component id="txttoptech" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace pref="19" max="32767" attributes="0"/>
-                  <Group type="103" groupAlignment="3" attributes="0">
-                      <Component id="btnBuscar" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="btnExportarExcel" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="lblBuscar" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="comboFiltro" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="txtBuscar" alignment="3" min="-2" max="-2" attributes="0"/>
-                  </Group>
-                  <EmptySpace max="-2" attributes="0"/>
+                  <EmptySpace min="-2" pref="388" max="-2" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -279,42 +259,6 @@
             </Property>
             <Property name="text" type="java.lang.String" value="top tech"/>
           </Properties>
-        </Component>
-        <Component class="javax.swing.JButton" name="btnBuscar">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Buscar"/>
-          </Properties>
-        </Component>
-        <Component class="javax.swing.JButton" name="btnExportarExcel">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Exportar a Excel"/>
-          </Properties>
-        </Component>
-        <Component class="javax.swing.JLabel" name="lblBuscar">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Buscar por:"/>
-          </Properties>
-        </Component>
-        <Component class="javax.swing.JComboBox" name="comboFiltro">
-          <Properties>
-            <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-              <StringArray count="5">
-                <StringItem index="0" value="SELECCIONAR ESTADO"/>
-                <StringItem index="1" value="ASIGNADO"/>
-                <StringItem index="2" value="ATENCION"/>
-                <StringItem index="3" value="SOLUCIONADO"/>
-                <StringItem index="4" value="CANCELADO"/>
-              </StringArray>
-            </Property>
-          </Properties>
-          <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="comboFiltroActionPerformed"/>
-          </Events>
-          <AuxValues>
-            <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
-          </AuxValues>
-        </Component>
-        <Component class="javax.swing.JTextField" name="txtBuscar">
         </Component>
       </SubComponents>
     </Container>
