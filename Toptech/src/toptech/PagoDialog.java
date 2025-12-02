@@ -19,6 +19,7 @@ import java.util.List;
  * PagoDialog - Versión fusionada CORREGIDA con tabla funcional
  */
 public class PagoDialog extends JDialog {
+
     private String ticketId;
 
     public PagoDialog(JFrame parent, String ticketId) {
@@ -144,10 +145,10 @@ public class PagoDialog extends JDialog {
             if (pagos.isEmpty()) {
                 System.out.println("ℹ️ No hay pagos pendientes en la BD");
                 JOptionPane.showMessageDialog(this,
-                    "✅ No hay pagos pendientes de verificación.\n\n" +
-                    "Todos los pagos están al día.",
-                    "Sin Pagos Pendientes",
-                    JOptionPane.INFORMATION_MESSAGE);
+                        "✅ No hay pagos pendientes de verificación.\n\n"
+                        + "Todos los pagos están al día.",
+                        "Sin Pagos Pendientes",
+                        JOptionPane.INFORMATION_MESSAGE);
                 return;
             }
 
@@ -181,7 +182,7 @@ public class PagoDialog extends JDialog {
             for (int i = 0; i < pagos.size(); i++) {
                 Payment pago = pagos.get(i);
                 data[i][0] = pago.getTicketRef();
-                
+
                 // Obtener nombre del cliente
                 try {
                     Ticket ticket = new TicketManager().findTicketById(pago.getTicketRef());
@@ -189,7 +190,7 @@ public class PagoDialog extends JDialog {
                 } catch (Exception e) {
                     data[i][1] = "N/A";
                 }
-                
+
                 data[i][2] = "S/ " + String.format("%.2f", pago.getAmount());
                 data[i][3] = pago.getMetodoPago();
                 data[i][4] = pago.getDate() != null ? pago.getDate().toString() : "N/A";
@@ -235,9 +236,9 @@ public class PagoDialog extends JDialog {
                     mostrarImagenPago(pagoSeleccionado);
                 } else {
                     JOptionPane.showMessageDialog(pagosDialog,
-                        "⚠️ Por favor, selecciona un pago de la tabla para ver el comprobante.",
-                        "Selección Requerida",
-                        JOptionPane.WARNING_MESSAGE);
+                            "⚠️ Por favor, selecciona un pago de la tabla para ver el comprobante.",
+                            "Selección Requerida",
+                            JOptionPane.WARNING_MESSAGE);
                 }
             });
 
@@ -255,9 +256,9 @@ public class PagoDialog extends JDialog {
                     verificarPago(pagoSeleccionado, pagosDialog);
                 } else {
                     JOptionPane.showMessageDialog(pagosDialog,
-                        "⚠️ Por favor, selecciona un pago de la tabla para verificar.",
-                        "Selección Requerida",
-                        JOptionPane.WARNING_MESSAGE);
+                            "⚠️ Por favor, selecciona un pago de la tabla para verificar.",
+                            "Selección Requerida",
+                            JOptionPane.WARNING_MESSAGE);
                 }
             });
 
@@ -300,9 +301,9 @@ public class PagoDialog extends JDialog {
             System.err.println("💥 Error al cargar pagos pendientes: " + e.getMessage());
             e.printStackTrace();
             JOptionPane.showMessageDialog(this,
-                "❌ Error al cargar pagos pendientes:\n" + e.getMessage(),
-                "Error de Base de Datos",
-                JOptionPane.ERROR_MESSAGE);
+                    "❌ Error al cargar pagos pendientes:\n" + e.getMessage(),
+                    "Error de Base de Datos",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -314,11 +315,11 @@ public class PagoDialog extends JDialog {
         if (imagenUrl == null || imagenUrl.trim().isEmpty()) {
             System.out.println("⚠️ imagenUrl es null o vacío");
             JOptionPane.showMessageDialog(this,
-                "❌ No hay comprobante disponible para este pago.\n\n" +
-                "Ticket: " + pago.getTicketRef() + "\n" +
-                "El cliente no subió ninguna imagen de comprobante.",
-                "Sin Comprobante",
-                JOptionPane.WARNING_MESSAGE);
+                    "❌ No hay comprobante disponible para este pago.\n\n"
+                    + "Ticket: " + pago.getTicketRef() + "\n"
+                    + "El cliente no subió ninguna imagen de comprobante.",
+                    "Sin Comprobante",
+                    JOptionPane.WARNING_MESSAGE);
             return;
         }
 
@@ -359,8 +360,8 @@ public class PagoDialog extends JDialog {
             JPanel infoPanel = new JPanel(new GridLayout(0, 2, 15, 8));
             infoPanel.setBackground(new Color(236, 240, 241));
             infoPanel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createEmptyBorder(15, 15, 15, 15),
-                BorderFactory.createLineBorder(new Color(189, 195, 199), 1)
+                    BorderFactory.createEmptyBorder(15, 15, 15, 15),
+                    BorderFactory.createLineBorder(new Color(189, 195, 199), 1)
             ));
 
             addInfoLabel(infoPanel, "📋 Ticket:", pago.getTicketRef());
@@ -377,8 +378,8 @@ public class PagoDialog extends JDialog {
 
             if (imagen.getWidth() > maxWidth || imagen.getHeight() > maxHeight) {
                 double scale = Math.min(
-                    (double) maxWidth / imagen.getWidth(),
-                    (double) maxHeight / imagen.getHeight()
+                        (double) maxWidth / imagen.getWidth(),
+                        (double) maxHeight / imagen.getHeight()
                 );
                 int newWidth = (int) (imagen.getWidth() * scale);
                 int newHeight = (int) (imagen.getHeight() * scale);
@@ -430,16 +431,16 @@ public class PagoDialog extends JDialog {
             System.err.println("💥 Error al cargar imagen: " + e.getMessage());
             e.printStackTrace();
             JOptionPane.showMessageDialog(this,
-                "❌ Error al cargar comprobante:\n\n" +
-                "Ticket: " + pago.getTicketRef() + "\n" +
-                "Ruta: " + imagenUrl + "\n" +
-                "Error: " + e.getMessage() + "\n\n" +
-                "Verifica:\n" +
-                "• Que Tomcat esté ejecutándose en puerto 8080\n" +
-                "• Que ImageServlet esté configurado\n" +
-                "• Que el archivo exista en Tomcat",
-                "Error al Cargar Imagen",
-                JOptionPane.ERROR_MESSAGE);
+                    "❌ Error al cargar comprobante:\n\n"
+                    + "Ticket: " + pago.getTicketRef() + "\n"
+                    + "Ruta: " + imagenUrl + "\n"
+                    + "Error: " + e.getMessage() + "\n\n"
+                    + "Verifica:\n"
+                    + "• Que Tomcat esté ejecutándose en puerto 8080\n"
+                    + "• Que ImageServlet esté configurado\n"
+                    + "• Que el archivo exista en Tomcat",
+                    "Error al Cargar Imagen",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -457,7 +458,7 @@ public class PagoDialog extends JDialog {
         panel.add(lblValue);
     }
 
-   private BufferedImage descargarImagen(String imageUrl) {
+    private BufferedImage descargarImagen(String imageUrl) {
         System.out.println("📥 DescargarImagen - URL: " + imageUrl);
 
         try {
@@ -493,7 +494,7 @@ public class PagoDialog extends JDialog {
             e.printStackTrace();
             return null;
         }
-    } 
+    }
 
     private void diagnosticoCompleto() {
         try {
@@ -506,9 +507,9 @@ public class PagoDialog extends JDialog {
 
             if (pagos.isEmpty()) {
                 JOptionPane.showMessageDialog(this,
-                    "ℹ️ No hay pagos pendientes para diagnosticar",
-                    "Diagnóstico",
-                    JOptionPane.INFORMATION_MESSAGE);
+                        "ℹ️ No hay pagos pendientes para diagnosticar",
+                        "Diagnóstico",
+                        JOptionPane.INFORMATION_MESSAGE);
                 return;
             }
 
@@ -523,77 +524,116 @@ public class PagoDialog extends JDialog {
             if (imagen != null) {
                 System.out.println("✅ DIAGNÓSTICO EXITOSO");
                 JOptionPane.showMessageDialog(this,
-                    "✅ DIAGNÓSTICO EXITOSO\n\n" +
-                    "La conexión con el servidor funciona correctamente.\n\n" +
-                    "Detalles:\n" +
-                    "• Ticket: " + primerPago.getTicketRef() + "\n" +
-                    "• Archivo: " + primerPago.getImagenUrl() + "\n" +
-                    "• Dimensiones: " + imagen.getWidth() + "x" + imagen.getHeight() + " px\n" +
-                    "• Servidor: http://localhost:8080/toptechweb",
-                    "Diagnóstico Exitoso",
-                    JOptionPane.INFORMATION_MESSAGE);
+                        "✅ DIAGNÓSTICO EXITOSO\n\n"
+                        + "La conexión con el servidor funciona correctamente.\n\n"
+                        + "Detalles:\n"
+                        + "• Ticket: " + primerPago.getTicketRef() + "\n"
+                        + "• Archivo: " + primerPago.getImagenUrl() + "\n"
+                        + "• Dimensiones: " + imagen.getWidth() + "x" + imagen.getHeight() + " px\n"
+                        + "• Servidor: http://localhost:8080/toptechweb",
+                        "Diagnóstico Exitoso",
+                        JOptionPane.INFORMATION_MESSAGE);
             } else {
                 System.out.println("❌ DIAGNÓSTICO FALLIDO");
                 JOptionPane.showMessageDialog(this,
-                    "❌ DIAGNÓSTICO FALLIDO\n\n" +
-                    "No se pudo cargar la imagen desde el servidor.\n\n" +
-                    "Verifica:\n" +
-                    "1. Que Tomcat esté corriendo en puerto 8080\n" +
-                    "2. Que ImageServlet esté desplegado\n" +
-                    "3. URL de prueba:\n" + testUrl,
-                    "Diagnóstico Fallido",
-                    JOptionPane.ERROR_MESSAGE);
+                        "❌ DIAGNÓSTICO FALLIDO\n\n"
+                        + "No se pudo cargar la imagen desde el servidor.\n\n"
+                        + "Verifica:\n"
+                        + "1. Que Tomcat esté corriendo en puerto 8080\n"
+                        + "2. Que ImageServlet esté desplegado\n"
+                        + "3. URL de prueba:\n" + testUrl,
+                        "Diagnóstico Fallido",
+                        JOptionPane.ERROR_MESSAGE);
             }
 
         } catch (Exception e) {
             System.err.println("💥 Error en diagnóstico: " + e.getMessage());
             e.printStackTrace();
             JOptionPane.showMessageDialog(this,
-                "❌ Error en diagnóstico:\n" + e.getMessage(),
-                "Error",
-                JOptionPane.ERROR_MESSAGE);
+                    "❌ Error en diagnóstico:\n" + e.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
     private void verificarPago(Payment pago, JDialog parentDialog) {
         int confirm = JOptionPane.showConfirmDialog(parentDialog,
-            "¿Marcar el pago como VERIFICADO?\n\n" +
-            "📋 Detalles del pago:\n" +
-            "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n" +
-            "• Ticket: " + pago.getTicketRef() + "\n" +
-            "• Monto: S/ " + String.format("%.2f", pago.getAmount()) + "\n" +
-            "• Método: " + pago.getMetodoPago() + "\n" +
-            "• Operación: " + (pago.getNumeroOperacion() != null ? pago.getNumeroOperacion() : "N/A") + "\n" +
-            "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n" +
-            "Esta acción actualizará el estado del pago a VERIFICADO.",
-            "✅ Confirmar Verificación",
-            JOptionPane.YES_NO_OPTION,
-            JOptionPane.QUESTION_MESSAGE);
+                "Marcar el pago como VERIFICADO?\n\n"
+                + "Detalles del pago:\n"
+                + "• Ticket: " + pago.getTicketRef() + "\n"
+                + "• Monto: S/ " + String.format("%.2f", pago.getAmount()) + "\n"
+                + "• Método: " + pago.getMetodoPago() + "\n"
+                + "• Operación: " + (pago.getNumeroOperacion() != null ? pago.getNumeroOperacion() : "N/A") + "\n\n"
+                + "Esta acción actualizará el estado del pago a VERIFICADO.",
+                "Confirmar Verificación",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE);
 
         if (confirm == JOptionPane.YES_OPTION) {
             try {
                 PaymentDAO paymentDAO = new PaymentDAO();
                 paymentDAO.actualizarEstadoPago(pago.getTicketRef(), "VERIFICADO");
 
-                System.out.println("✅ Pago verificado: " + pago.getTicketRef());
+                System.out.println("Pago verificado: " + pago.getTicketRef());
+
+                // Obtener datos del ticket para enviar correo
+                TicketManager ticketManager = new TicketManager();
+                Ticket ticket = ticketManager.findTicketById(pago.getTicketRef());
+
+                if (ticket != null && ticket.getCorreo() != null && !ticket.getCorreo().isEmpty()) {
+                    // Enviar correo al cliente
+                    enviarCorreoVerificacion(ticket, pago);
+                }
 
                 JOptionPane.showMessageDialog(parentDialog,
-                    "✅ PAGO VERIFICADO EXITOSAMENTE\n\n" +
-                    "El ticket " + pago.getTicketRef() + " ha sido marcado como VERIFICADO.\n" +
-                    "El cliente será notificado del estado de su pago.",
-                    "Verificación Exitosa",
-                    JOptionPane.INFORMATION_MESSAGE);
+                        "PAGO VERIFICADO EXITOSAMENTE\n\n"
+                        + "El ticket " + pago.getTicketRef() + " ha sido marcado como VERIFICADO.\n"
+                        + "El cliente ha sido notificado por correo electrónico.",
+                        "Verificación Exitosa",
+                        JOptionPane.INFORMATION_MESSAGE);
 
                 parentDialog.dispose();
 
             } catch (SQLException e) {
-                System.err.println("❌ Error al verificar pago: " + e.getMessage());
+                System.err.println("Error al verificar pago: " + e.getMessage());
                 e.printStackTrace();
                 JOptionPane.showMessageDialog(parentDialog,
-                    "❌ Error al verificar pago:\n\n" + e.getMessage(),
-                    "Error de Verificación",
-                    JOptionPane.ERROR_MESSAGE);
+                        "Error al verificar pago:\n\n" + e.getMessage(),
+                        "Error de Verificación",
+                        JOptionPane.ERROR_MESSAGE);
             }
+        }
+    }
+
+    private void enviarCorreoVerificacion(Ticket ticket, Payment pago) {
+        try {
+            String destinatario = ticket.getCorreo();
+            String asunto = "[TOP TECH] Pago Verificado - Ticket " + ticket.getId();
+
+            String mensaje
+                    = "Estimado/a " + ticket.getCliente() + ",\n\n"
+                    + "Su pago ha sido verificado exitosamente.\n\n"
+                    + "DETALLES DEL PAGO:\n"
+                    + "Ticket: " + ticket.getId() + "\n"
+                    + "Monto: S/ " + String.format("%.2f", pago.getAmount()) + "\n"
+                    + "Metodo de pago: " + pago.getMetodoPago() + "\n"
+                    + "Estado: VERIFICADO\n\n"
+                    + "PROXIMOS PASOS:\n"
+                    + "Su equipo (" + ticket.getEquipo() + ") sera atendido segun la prioridad: " + ticket.getPrioridad() + "\n"
+                    + "Le notificaremos cuando su equipo este listo.\n\n"
+                    + "Gracias por confiar en TOP TECH.\n\n"
+                    + "Atentamente,\n"
+                    + "Equipo TOP TECH\n"
+                    + "Servicio Tecnico";
+
+            // Usar el metodo estatico que SI envia correos reales
+            notifications.EmailNotificationService.enviarCorreoEstatico(destinatario, asunto, mensaje);
+
+            System.out.println("Correo de verificacion enviado a: " + destinatario);
+
+        } catch (Exception e) {
+            System.err.println("Error al enviar correo de verificacion: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 }
