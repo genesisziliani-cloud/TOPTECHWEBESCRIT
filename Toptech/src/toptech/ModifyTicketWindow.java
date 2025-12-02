@@ -300,141 +300,117 @@ public class ModifyTicketWindow extends javax.swing.JFrame {
     }
 
     private void onGuardar() {
-        String id = txtIdTicket.getText().trim();
-        if (id.isEmpty()) { JOptionPane.showMessageDialog(this, "Ingrese ID del ticket."); return; }
+    String id = txtIdTicket.getText().trim();
+    if (id.isEmpty()) { 
+        JOptionPane.showMessageDialog(this, "Ingrese ID del ticket."); 
+        return; 
+    }
 
-        Ticket ticket = ticketManager.findTicketById(id);
-        if (ticket == null) { JOptionPane.showMessageDialog(this, "Ticket no encontrado."); return; }
+    Ticket ticketOriginal = ticketManager.findTicketById(id);
+    if (ticketOriginal == null) { 
+        JOptionPane.showMessageDialog(this, "Ticket no encontrado."); 
+        return; 
+    }
 
-        String cliente = txtCliente.getText().trim();
-        String dni = txtDni.getText().trim();
-        String equipoSel = (String) equipo.getSelectedItem();
-        String descripcion = txtDescripcion.getText().trim();
-        String estadoSel = (String) estado.getSelectedItem();
-        String tecnicoSel = (String) tecnicos.getSelectedItem();
-        String prioridadSel = (String) prioridad.getSelectedItem();
+    // Guardar valores originales
+    String nombreOriginal = ticketOriginal.getCliente();
+    String dniOriginal = ticketOriginal.getDni();
 
-        if (cliente.isEmpty() || descripcion.isEmpty()) { JOptionPane.showMessageDialog(this, "Complete los campos requeridos."); return; }
+    // Obtener valores nuevos del formulario
+    String clienteNuevo = txtCliente.getText().trim();
+    String dniNuevo = txtDni.getText().trim();
+    String equipoSel = (String) equipo.getSelectedItem();
+    String descripcion = txtDescripcion.getText().trim();
+    String estadoSel = (String) estado.getSelectedItem();
+    String tecnicoSel = (String) tecnicos.getSelectedItem();
+    String prioridadSel = (String) prioridad.getSelectedItem();
 
-        ticket.setCliente(cliente);
-        ticket.setDni(dni);
-        ticket.setEquipo(equipoSel);
-        ticket.setDescripcion(descripcion);
-        ticket.setEstado(estadoSel);
-        ticket.setTecnico(tecnicoSel);
-        ticket.setPrioridad(prioridadSel);
-        ticket.setDiagnosticoPagado(chkDiagnosticoPagado.isSelected());
-        ticket.setCorreo(txtCorreo.getText().trim());
-        ticket.setCelular(txtCelular.getText().trim());
+    if (clienteNuevo.isEmpty() || descripcion.isEmpty()) { 
+        JOptionPane.showMessageDialog(this, "Complete los campos requeridos."); 
+        return; 
+    }
 
-        double monto = 0.0;
-        try { monto = Double.parseDouble(txtMontoReparacion.getText().trim().replace(",", ".")); } catch (Exception ignored) {}
-        ticket.setMontoReparacion(monto);
+    // Validar si cambio el nombre pero el DNI sigue igual
+    boolean nombreCambio = !clienteNuevo.equals(nombreOriginal);
+    boolean dniIgual = dniNuevo.equals(dniOriginal);
 
-        boolean finEstado = "SOLUCIONADO".equalsIgnoreCase(estadoSel) || "CANCELADO".equalsIgnoreCase(estadoSel);
-        if (finEstado) ticket.setFechaFin(dfDateTime.format(new Date()));
-        else ticket.setFechaFin("");
+    if (nombreCambio && dniIgual) {
+        // El nombre cambio pero el DNI es el mismo
+        int opcion = JOptionPane.showConfirmDialog(this,
+            "El nombre cambiara de:\n" +
+            "\"" + nombreOriginal + "\" a \"" + clienteNuevo + "\"\n\n" +
+            "Se actualizara en TODOS los tickets con DNI " + dniOriginal + "\n" +
+            "Desea continuar?",
+            "Actualizar Nombre",
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.WARNING_MESSAGE);
 
-        // Invocar ticketManager.updateTicket(...) por reflexión para soportar void o boolean
-        boolean updateOk = false;
+        if (opcion != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        // Actualizar nombre en todos los tickets con ese DNI
+        int ticketsActualizados = ticketManager.updateNombreByDni(dniOriginal, clienteNuevo);
+        System.out.println("Tickets actualizados con nuevo nombre: " + ticketsActualizados);
+    }
+
+    // Actualizar el ticket actual con todos los campos
+    ticketOriginal.setCliente(clienteNuevo);
+    ticketOriginal.setDni(dniNuevo);
+    ticketOriginal.setEquipo(equipoSel);
+    ticketOriginal.setDescripcion(descripcion);
+    ticketOriginal.setEstado(estadoSel);
+    ticketOriginal.setTecnico(tecnicoSel);
+    ticketOriginal.setPrioridad(prioridadSel);
+    ticketOriginal.setDiagnosticoPagado(chkDiagnosticoPagado.isSelected());
+    ticketOriginal.setCorreo(txtCorreo.getText().trim());
+    ticketOriginal.setCelular(txtCelular.getText().trim());
+
+    double monto = 0.0;
+    try { 
+        monto = Double.parseDouble(txtMontoReparacion.getText().trim().replace(",", ".")); 
+    } catch (Exception ignored) {}
+    ticketOriginal.setMontoReparacion(monto);
+
+    boolean finEstado = "SOLUCIONADO".equalsIgnoreCase(estadoSel) || "CANCELADO".equalsIgnoreCase(estadoSel);
+    if (finEstado) ticketOriginal.setFechaFin(dfDateTime.format(new Date()));
+    else ticketOriginal.setFechaFin("");
+
+    // Guardar el ticket
+    boolean updateOk = false;
+    try {
+        Method m = ticketManager.getClass().getMethod("updateTicket", Ticket.class);
+        Object res = m.invoke(ticketManager, ticketOriginal);
+        if (res == null) {
+            updateOk = true;
+        } else if (res instanceof Boolean) {
+            updateOk = (Boolean) res;
+        } else {
+            updateOk = true;
+        }
+    } catch (NoSuchMethodException ns) {
         try {
-            Method m = ticketManager.getClass().getMethod("updateTicket", Ticket.class);
-            Object res = m.invoke(ticketManager, ticket);
-            if (res == null) {
-                // método void -> asumimos que no lanzó excepción => ok
-                updateOk = true;
-            } else if (res instanceof Boolean) {
-                updateOk = (Boolean) res;
-            } else {
-                updateOk = true;
-            }
-        } catch (NoSuchMethodException ns) {
-            // si no existe, intentar método con otra firma (por ejemplo update)
-            try {
-                Method alt = ticketManager.getClass().getMethod("update", Ticket.class);
-                Object res2 = alt.invoke(ticketManager, ticket);
-                updateOk = (res2 == null) || (res2 instanceof Boolean ? (Boolean) res2 : true);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                updateOk = false;
-            }
+            Method alt = ticketManager.getClass().getMethod("update", Ticket.class);
+            Object res2 = alt.invoke(ticketManager, ticketOriginal);
+            updateOk = (res2 == null) || (res2 instanceof Boolean ? (Boolean) res2 : true);
         } catch (Exception ex) {
             ex.printStackTrace();
             updateOk = false;
         }
-
-        if (updateOk) {
-            // Actualizar usuario relacionado (si existe) por reflexión
-            try {
-                if (dni != null && !dni.trim().isEmpty()) {
-                    // intentar findUserByDNI
-                    User found = null;
-                    try {
-                        Method f = userManager.getClass().getMethod("findUserByDNI", String.class);
-                        Object fu = f.invoke(userManager, dni.trim());
-                        if (fu instanceof User) found = (User) fu;
-                    } catch (NoSuchMethodException ns) {
-                        // intentar findUserByDni o findByDni
-                        try {
-                            Method f2 = userManager.getClass().getMethod("findUserByDni", String.class);
-                            Object fu2 = f2.invoke(userManager, dni.trim());
-                            if (fu2 instanceof User) found = (User) fu2;
-                        } catch (NoSuchMethodException ignored) {}
-                    }
-
-                    if (found != null) {
-                        // separar nombre/apellido
-                        String full = cliente.trim();
-                        String nombre = full;
-                        String apellido = "";
-                        if (!full.isEmpty()) {
-                            String[] parts = full.split("\\s+");
-                            if (parts.length == 1) {
-                                nombre = parts[0];
-                                apellido = "";
-                            } else {
-                                nombre = parts[0];
-                                apellido = parts[parts.length - 1];
-                            }
-                        }
-                        // setear en el objeto User local
-                        found.setNombre(nombre);
-                        found.setApellido(apellido);
-                        // intentar userManager.updateUser(found) por reflexión
-                        try {
-                            Method up = userManager.getClass().getMethod("updateUser", User.class);
-                            Object r = up.invoke(userManager, found);
-                            // aceptar void o boolean
-                            boolean userOk = (r == null) || (r instanceof Boolean ? (Boolean) r : true);
-                            if (userOk) System.out.println("DEBUG: Usuario actualizado por DNI: " + dni);
-                            else System.out.println("DEBUG: No se pudo actualizar usuario por DNI: " + dni);
-                        } catch (NoSuchMethodException nm2) {
-                            // no existe updateUser; intentar update
-                            try {
-                                Method up2 = userManager.getClass().getMethod("update", User.class);
-                                Object r2 = up2.invoke(userManager, found);
-                                System.out.println("DEBUG: update(User) invocado, resultado: " + r2);
-                            } catch (NoSuchMethodException ignored) {
-                                System.out.println("DEBUG: UserManager no expone updateUser(User) ni update(User).");
-                            }
-                        }
-                    } else {
-                        System.out.println("DEBUG: No existe usuario con DNI: " + dni + " - no se actualizó Users.");
-                    }
-                }
-            } catch (Exception ex) {
-                System.err.println("Error actualizando usuario desde ModifyTicketWindow: " + ex.getMessage());
-                ex.printStackTrace();
-            }
-
-            refreshParentLists();
-            JOptionPane.showMessageDialog(this, "Ticket modificado correctamente.");
-            if (parentWindow != null) parentWindow.setVisible(true);
-            dispose();
-        } else {
-            JOptionPane.showMessageDialog(this, "No se pudo modificar el ticket. Revisa logs.");
-        }
+    } catch (Exception ex) {
+        ex.printStackTrace();
+        updateOk = false;
     }
+
+    if (updateOk) {
+        refreshParentLists();
+        JOptionPane.showMessageDialog(this, "Ticket modificado correctamente.");
+        if (parentWindow != null) parentWindow.setVisible(true);
+        dispose();
+    } else {
+        JOptionPane.showMessageDialog(this, "No se pudo modificar el ticket.");
+    }
+}
 
    private void onVerCapturas() {
     String id = txtIdTicket.getText().trim();
