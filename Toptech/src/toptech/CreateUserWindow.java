@@ -185,7 +185,7 @@ public class CreateUserWindow extends javax.swing.JFrame {
         jSeparator2.setForeground(new java.awt.Color(51, 102, 255));
 
         roles.setFont(new java.awt.Font("Decker", 0, 12)); // NOI18N
-        roles.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "SELECCIONE", "ADMINISTRADOR", "TECNICO", "CLIENTE", " " }));
+        roles.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "-SELECCIONE-", "ADMINISTRADOR", "TECNICO" }));
         roles.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 rolesActionPerformed(evt);
