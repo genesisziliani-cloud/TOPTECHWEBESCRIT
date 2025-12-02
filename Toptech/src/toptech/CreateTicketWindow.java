@@ -1,4 +1,5 @@
 package toptech;
+
 import javax.swing.*;
 import managers.TicketManager;
 import managers.UserManager;
@@ -8,10 +9,11 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class CreateTicketWindow extends javax.swing.JFrame {
+
     private TicketManager ticketManager;
     private UserManager userManager;
     private JFrame parentWindow;
-    
+
     public CreateTicketWindow(TicketManager ticketManager, UserManager userManager, JFrame parentWindow) {
         this.ticketManager = ticketManager;
         this.userManager = userManager;
@@ -22,11 +24,11 @@ public class CreateTicketWindow extends javax.swing.JFrame {
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         inicializarDatos();
     }
-    
+
     public CreateTicketWindow() {
         initComponents();
     }
-    
+
     private void inicializarDatos() {
         tecnicos.removeAllItems();
         for (User u : userManager.getAllUsers()) {
@@ -38,7 +40,7 @@ public class CreateTicketWindow extends javax.swing.JFrame {
         txtfechadecreacion.setText(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date()));
         txtfechafin.setText("");
     }
-    
+
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -401,6 +403,7 @@ public class CreateTicketWindow extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_equipoActionPerformed
 
+    //BOTON GUARDAR, ACTUALIZADO
     private void btnGuardarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuardarActionPerformed
         String cliente = txtcliente1.getText().trim();
         String dni = txtdni1.getText().trim();
@@ -415,43 +418,97 @@ public class CreateTicketWindow extends javax.swing.JFrame {
         String celular = txtcelular1.getText().trim();
         boolean diagnosticoPagado = chkDiagnosticoPagado.isSelected();
 
-        if (cliente.isEmpty() || !cliente.matches("[A-Za-z]+ [A-Za-z]+")) {
-            JOptionPane.showMessageDialog(this, "Cliente: solo 1 nombre y 1 apellido, letras.");
+        String id = txtidedelticket.getText().trim();
+
+        // Validar que el ID del ticket no exista
+        if (ticketManager.findTicketById(id) != null) {
+            JOptionPane.showMessageDialog(this,
+                    "El ticket '" + id + "' ya existe.\nPor favor, use un ID diferente.",
+                    "Ticket Duplicado",
+                    JOptionPane.ERROR_MESSAGE);
             return;
         }
+
+        // Validar DNI
         if (!(dni.length() == 8 || dni.length() == 11) || !dni.matches("\\d+")) {
             JOptionPane.showMessageDialog(this, "DNI/RUC: solo 8 o 11 dígitos numéricos.");
             return;
         }
+
+        // Verificar si el DNI ya existe
+        String nombreRegistrado = ticketManager.getNombreByDni(dni);
+
+        if (nombreRegistrado != null) {
+            // El DNI ya existe, usar el nombre registrado
+            int opcion = JOptionPane.showConfirmDialog(this,
+                    "El DNI " + dni + " ya está registrado como:\n"
+                    + "\"" + nombreRegistrado + "\"\n\n"
+                    + "Desea crear el ticket con este nombre?",
+                    "DNI Existente",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.WARNING_MESSAGE);
+
+            if (opcion != JOptionPane.YES_OPTION) {
+                return;
+            }
+
+            // Usar el nombre registrado
+            cliente = nombreRegistrado;
+            txtcliente1.setText(nombreRegistrado);
+
+        } else {
+            // DNI nuevo, validar el nombre ingresado
+            if (cliente.isEmpty() || !cliente.matches("[A-Za-z]+ [A-Za-z]+")) {
+                JOptionPane.showMessageDialog(this, "Cliente: debe ingresar nombre y apellido (solo letras).");
+                return;
+            }
+        }
+
+        // Validar correo
         if (correo.isEmpty() || !correo.matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
-            JOptionPane.showMessageDialog(this, "Correo: debe ingresar un correo válido (obligatorio).");
+            JOptionPane.showMessageDialog(this, "Correo: debe ingresar un correo válido.");
             return;
         }
+
+        // Validar celular
         if (!celular.matches("\\d{9,}")) {
-            JOptionPane.showMessageDialog(this, "ERROR: El número de celular debe contener 9 dígitos");
+            JOptionPane.showMessageDialog(this, "Celular: solo números, mínimo 9 dígitos.");
             return;
         }
+
+        // Validar descripción
         if (descripcion.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Descripción requerida.");
             return;
         }
 
-        String id = txtidedelticket.getText();
-
+        // Crear el ticket con los datos validados
         Ticket ticket = new Ticket(
-            id, cliente, dni, equipoSel, descripcion, estadoSel, tecnicoSel, prioridadSel, fechaCreacion, fechaFin, correo, celular,
-            diagnosticoPagado, 0.0
+                id, cliente, dni, equipoSel, descripcion, estadoSel, tecnicoSel, prioridadSel,
+                fechaCreacion, fechaFin, correo, celular, diagnosticoPagado, 0.0
         );
-        ticketManager.addTicket(ticket);
 
-        if (userManager.findUserByDNI(dni) == null) {
-            String[] parts = cliente.split(" ");
-            userManager.addUser(new User(dni, parts[0], parts[1], dni, "", "CLIENTE"));
+        try {
+            ticketManager.addTicket(ticket);
+
+            JOptionPane.showMessageDialog(this,
+                    "Ticket creado correctamente.\nID: " + id,
+                    "Exito",
+                    JOptionPane.INFORMATION_MESSAGE);
+
+            if (parentWindow != null) {
+                parentWindow.setVisible(true);
+            }
+            dispose();
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    "Error al crear el ticket:\n" + e.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
         }
-        JOptionPane.showMessageDialog(this, "Ticket creado correctamente.");
-        if (parentWindow != null) parentWindow.setVisible(true);
-        dispose();
- 
+
     }//GEN-LAST:event_btnGuardarActionPerformed
 
     private void btnCancelarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelarActionPerformed
@@ -477,9 +534,9 @@ public class CreateTicketWindow extends javax.swing.JFrame {
     private void tecnicosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tecnicosActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_tecnicosActionPerformed
-    
+
     public static void main(String args[]) {
-         java.awt.EventQueue.invokeLater(new Runnable() {
+        java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 new CreateTicketWindow().setVisible(true);
             }
