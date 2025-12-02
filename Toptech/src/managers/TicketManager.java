@@ -13,14 +13,15 @@ import java.util.ArrayList;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * TicketManager actualizado:
- * - notifiers usa CopyOnWriteArrayList para seguridad en concurrencia
- * - addNotifier() evita duplicados
- * - removeNotifier() permite desregistrar listeners (evita fugas y notificaciones duplicadas)
+ * TicketManager actualizado: - notifiers usa CopyOnWriteArrayList para
+ * seguridad en concurrencia - addNotifier() evita duplicados - removeNotifier()
+ * permite desregistrar listeners (evita fugas y notificaciones duplicadas)
  *
- * Mantiene todos los métodos públicos originales (getAllTickets, addTicket, updateTicket, etc.)
+ * Mantiene todos los métodos públicos originales (getAllTickets, addTicket,
+ * updateTicket, etc.)
  */
 public class TicketManager {
+
     private TicketDAO dao;
     private static int nextId = 1;
     // Uso CopyOnWriteArrayList para iterar/añadir/remover sin ConcurrentModificationException
@@ -36,7 +37,9 @@ public class TicketManager {
 
     // Registro de notificador (evita duplicados)
     public void addNotifier(NotificationService notifier) {
-        if (notifier == null) return;
+        if (notifier == null) {
+            return;
+        }
         if (!notifiers.contains(notifier)) {
             notifiers.add(notifier);
         }
@@ -44,7 +47,9 @@ public class TicketManager {
 
     // Nuevo: quitar notificador cuando la UI se cierre
     public void removeNotifier(NotificationService notifier) {
-        if (notifier == null) return;
+        if (notifier == null) {
+            return;
+        }
         notifiers.remove(notifier);
     }
 
@@ -145,4 +150,24 @@ public class TicketManager {
             return new Ticket[0];
         }
     }
+
+    //NUEVOS METODOS
+    public String getNombreByDni(String dni) {
+        try {
+            List<Ticket> tickets = dao.getTicketsByUserDni(dni);
+            return (tickets != null && !tickets.isEmpty()) ? tickets.get(0).getCliente() : null;
+        } catch (SQLException e) {
+            return null;
+        }
+    }
+
+    public int updateNombreByDni(String dni, String nuevoNombre) {
+        try {
+            return dao.updateNombreByDni(dni, nuevoNombre);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
 }
