@@ -98,7 +98,7 @@ public class ListUsersWindow extends javax.swing.JFrame {
         }
         cargarClientes();
     }
-
+//VERIFICAR 
     /**
      * Filtra los usuarios según el criterio seleccionado
      */
