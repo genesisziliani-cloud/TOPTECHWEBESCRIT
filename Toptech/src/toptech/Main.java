@@ -49,5 +49,5 @@ public class Main {
         } catch (Exception e) {
             System.err.println("Error configurando notificaciones: " + e.getMessage());
         }
-    }
+    }//TEST rernjksdjkfdsjkfdsjkbfdbsfkjbds
 }
