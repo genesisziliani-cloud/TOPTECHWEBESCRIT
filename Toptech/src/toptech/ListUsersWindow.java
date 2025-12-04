@@ -616,7 +616,7 @@ public class ListUsersWindow extends javax.swing.JFrame {
         getContentPane().add(jPanel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 550, 1137, 60));
 
         tablalistaclientes.setBackground(new java.awt.Color(51, 102, 255));
-        tablalistaclientes.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Lista de usuarios", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Decker", 0, 24), new java.awt.Color(255, 255, 255))); // NOI18N
+        tablalistaclientes.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Lista de clientes", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Decker", 0, 24), new java.awt.Color(255, 255, 255))); // NOI18N
         tablalistaclientes.setToolTipText("");
         tablalistaclientes.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
